@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!-- saved from url=(0102)http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class?display=Print -->
+<html style="height: 100%;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>A reusable, high performance, socket server class - Part 3 - CodeProject</title> 
+	<link type="text/css" rel="stylesheet" href="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/Main.min.css">
+
+	
+
+<meta name="Description" content="When a server has to deal with lots of short lived client connections it&#39;s advisable to use the Microsoft extension function for WinSock, AcceptEx(), to accept connections.; Author: Len Holgate; Updated: 19 Jul 2002; Section: Internet / Network; Chapter: General Programming; Updated: 19 Jul 2002">
+<meta name="Keywords" content="VC6, VC7, Win2K, WinXP, C++, Windows, Visual-Studio, MFC, Dev, Intermediate,Internet / Network,General Programming,Free source code, tutorials">
+<meta name="Author" content="Len Holgate">
+<meta name="Rating" content="General">
+<meta name="Revisit-After" content="1 days">
+<meta name="application-name" content="CodeProject">
+<meta name="google-translate-customization" content="d908bb7ce7aff658-4c2f3a504525c916-g629383f736781a8a-13">
+
+<link rel="dns-prefetch" href="http://ajax.googleapis.com/"> 
+
+
+
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - All Topics" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=1">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Android" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=22">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - iOS" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=25">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C++" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=2">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C#" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=3">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Web" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=23">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Lounge Postings" href="http://www.codeproject.com/webservices/LoungeRSS.aspx">
+<meta name="robots" content="index, follow">
+<link rel="search" type="application/opensearchdescription+xml" title="CodeProject" href="http://www.codeproject.com/info/OpenSearch.xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!--<base target="_top">--><base href="." target="_top">
+	<link rel="icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="shortcut icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="apple-touch-icon" href="http://www.codeproject.com/images/FavIcon-Apple.png" type="image/png">
+<script type="text/javascript" language="Javascript">//<![CDATA[
+function defrm () { /* thanks twitter */ document.write = ''; window.top.location = window.self.location;  setTimeout(function() { document.body.innerHTML = ''; }, 0);  window.self.onload = function(evt) { document.body.innerHTML = ''; }; }if (window.top !== window.self) {  try {  if (window.top.location.host) { /* will throw */ } else { defrm(); /* chrome */ }  } catch (ex) { defrm(); /* everyone else */ } }if (typeof(DemoUrl)!='undefined')   document.write(unescape('%3Cme')+'ta http'+'-equiv="re'+'fresh"                  con'+'tent="1;url='+DemoUrl+unescape('"%3CE'));
+
+//]]>
+</script>
+
+	
+
+
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-1735123-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_setDomainName', 'www.codeproject.com']);
+	_gaq.push(['_setSessionTimeout', '1200']); 
+
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+	})(); 
+</script><script type="text/javascript" async="" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/ga.js"></script>
+
+
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/translateelement.css"><script type="text/javascript" charset="UTF-8" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/main_zh-CN.js"></script><script type="text/javascript" charset="UTF-8" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/element_main.js"></script></head>	
+
+<body class="chrome chrome47 touch" style="position: relative; min-height: 100%; top: 0px;">
+
+<a class="access-link" href="http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class?display=Print#Main"><img alt="Click here to Skip to main content" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/t.gif"></a>
+
+
+
+
+
+<div class="page-background">
+
+	
+	
+
+	
+
+	
+    <div id="ctl00_STM" class="site-top-menu fluid">
+        <div class="main-content">
+            
+        </div>
+    </div>
+
+	
+    <div id="ctl00_SH" class="site-header fluid">
+        <div class="main-content">
+            <div class="logo"><a href="http://www.codeproject.com/"><img id="ctl00_Logo" tabindex="1" title="CodeProject" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/logo250x135.gif" alt="Home" style="height:135px;width:250px;border-width:0px;"></a></div>
+            <div class="promo"></div>
+        </div>
+    </div>
+
+	<a href="http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class?display=Print#Main"><img alt="Click here to Skip to main content" class="access-link" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/t.gif"></a>
+
+	
+			
+	
+
+	<div id="A" class="container-content-wrap fluid print"> 
+
+	<div itemscope="" itemtype="http://schema.org/Article" class="container-content"> 
+
+
+		<div class="clearfix">
+			<div class="container-breadcrumb float-left ">
+				<div><a href="http://www.codeproject.com/script/Content/SiteMap.aspx">Articles</a> » <a href="http://www.codeproject.com/Chapters/6/General-Programming.aspx">General Programming</a> » <a href="http://www.codeproject.com/KB/IP/"><span itemprop="articleSection">Internet / Network</span></a> » <a href="http://www.codeproject.com/KB/IP/#Beginners">Beginners</a></div>
+			</div>
+
+			<div class="float-left">
+				
+			</div>
+
+			<div class="edit-links float-right">
+				
+			</div>
+
+			<div class="article-nav float-right">
+					
+		        
+		        
+					
+
+                
+				
+			</div>
+		</div>
+
+		<table class="extended container-article-parts" cellpadding="0" cellspacing="0">
+        <tbody><tr valign="top">
+		<td width="117px" class="article-wing-left">
+
+			
+
+		</td>
+		<td>
+			
+			<div id="AT" class="container-article  fluid tight"> 
+
+				<div class="article">
+
+					<form name="aspnetForm" method="post" action="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/A reusable, high performance, socket server class - Part 3 - CodeProject.html" id="aspnetForm" style="margin:0;padding:0">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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">
+</div>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="10C1FD69">
+</div>
+
+					
+					 
+					<div class="header">
+					    <a name="Main"></a>
+
+					    
+					    <a name="_articleTop" id="_articleTop"></a>
+					    <div class="title">
+					        
+					        <h1 id="ctl00_ArticleTitle" itemprop="name">A reusable, high performance, socket server class - Part 3</h1> 
+					    </div>
+
+                        <div style="height:34px">
+					        
+					        <div class="entry float-left">
+                                
+                                <div class="float-left">
+
+						            <span class="author"><a href="http://www.codeproject.com/script/Membership/View.aspx?mid=133" rel="author"><span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><span itemprop="name">Len Holgate</span></span></a></span>, 
+						            <span class="date" itemprop="dateModified" title="Date last updated" content="2002-07-19 00:00:00">
+							            19 Jul 2002</span>
+			
+                                    <a id="ctl00_LicenseLink" title="The Code Project Open License (CPOL)" class="license" href="http://www.codeproject.com/info/cpol10.aspx">CPOL</a><div id="ctl00_CurRat" class="tooltip anchorLink" style="cursor:pointer;margin-top: 5px">
+				
+							            
+
+<table cellpadding="0" cellspacing="0" class="small-text" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating"> 
+<tbody><tr>
+	
+	<td class="nowrap">
+
+		
+			<meta itemprop="bestRating" content="5"> 
+			<meta itemprop="worstRating" content="1">
+		
+
+		<span id="ctl00_ArticleRating_VI">
+		<div class="nowrap rating-stars-medium" style="height:18px;width:80px;position:relative;">
+	<div class="clipped align-left float-left" style="height:16px;width:77px;">
+		<img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/stars-fill-md.png" style="border-width:0px;">
+	</div><div class="clipped" style="height:16px;width:3px;position:relative;">
+		<img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/stars-empty-md.png" style="border-width:0px;position:absolute;top:0;right:0;">
+	</div>
+</div>
+		</span>
+
+		
+	</td>
+	
+	<td id="ctl00_ArticleRating_VR" class="nowrap">
+		&nbsp;
+		<span id="ctl00_ArticleRating_VotesR">&nbsp;<span itemprop="ratingValue" class="rating">4.81</span> (<span itemprop="ratingCount" class="count">29</span> votes)</span>
+		
+	</td>
+
+</tr>
+
+</tbody></table>
+
+
+							            <div id="ctl00_RB" class="speech-bubble-container-up">
+								            <div class="speech-bubble-up" style="width:150px !important">
+									                        
+<div>
+<table class="feature" width="100%" height="20px" title="Voting Distribution. Recent data only" cellpadding="0" cellspacing="0"><tbody><tr class="chart-row"><td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="1 vote, 4.5%" title="1 vote, 4.5%"></div><span title="1 vote">1</span></td>
+<td class="chart-column"><span title="0 votes">2</span></td>
+<td class="chart-column"><span title="0 votes">3</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/pollcol.gif" width="20pxpx" height="2px" border="0px" alt="2 votes, 9.1%" title="2 votes, 9.1%"></div><span title="2 votes">4</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/pollcol.gif" width="20pxpx" height="20px" border="0px" alt="19 votes, 86.4%" title="19 votes, 86.4%"></div><span title="19 votes">5</span></td>
+</tr></tbody></table><div class="small-text align-center">4.81/5 - 29 votes</div><div class="small-text align-center subdue">1 removed</div><div class="small-text align-center subdue">μ 4.46, σ<sub>a</sub> 1.65 [<a href="http://www.codeproject.com/KB/FAQs/RatingReputationFAQ.aspx#noisefilter">?</a>]</div>
+</div>
+								            </div>
+								            <div class="speech-bubble-pointer-up">
+									            <div class="speech-bubble-pointer-up-inner"></div>
+								            </div>
+							            </div>
+						            </div>
+                                </div>
+					        </div>
+
+                            
+						    
+						    	
+                        </div>
+
+   					    
+                        <div id="ctl00_description" class="summary" itemprop="headline">When a server has to deal with lots of short lived client connections it's advisable to use the Microsoft extension function for WinSock, AcceptEx(), to accept connections.</div><span id="ctl00_thumbnailUrl" class="date" itemprop="image" content="https://codeproject.global.ssl.fastly.net/script/Articles/Images/article100x80.png"></span>			
+
+                    </div>
+                    
+					
+					
+
+					
+
+					
+					
+					
+
+						
+					
+
+					
+
+						
+						<div id="contentdiv" class="text" itemprop="articleBody">
+						
+
+
+
+<p>The following source was built using Visual Studio 6.0 SP5 and Visual Studio .Net. You need to have a version of the <a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">Microsoft Platform SDK</a> installed</p>
+<ul class="download">
+<li><a href="http://www.codeproject.com/KB/IP/JBSocketServer3/JBSocketServer5.zip">JBSocketServer5.zip - an echo server using AcceptEx - 87 Kb </a>
+</li><li><a href="http://www.codeproject.com/KB/IP/JBSocketServer3/JBServerShutdown.zip">JBSocketShutdown.zip - an off switch for the servers - 42 Kb </a></li></ul>
+<h2>Overview</h2>
+<p>When a server has to deal with lots of short lived client connections it's advisable to use the Microsoft extension function for WinSock, <code>AcceptEx()</code>, to accept connections. Creating a socket is a relatively "expensive" operation and by using <code>AcceptEx()</code> you can create the socket before the connection occurs rather than as it occurs, thus speeding the establishment of the connection. What's more, <code>AcceptEx()</code> can perform an initial data read at the same time as doing the connection establishment which means you can accept a connection and retrieve data with a single call.</p>
+<p>In this article we develop a socket server class that uses <code>AcceptEx()</code> and the related Microsoft extension functions. The resulting server class is similar to the one we developed in the <a href="http://www.codetools.com/internet/JBSocketServer1.asp">previous article</a> in that it does all of the hard work for you and provides a simple way to develop powerful and scalable socket servers.</p>
+<h2>Documentation bug, or undocumented behavior?</h2>
+<p>The <a href="http://msdn.microsoft.com/library/en-us/winsock/wsapiref_17jm.asp?frame=true">documentation for AcceptEx()</a> states:</p>
+<p>"When this operation is successfully completed, <code>sAcceptHandle</code> can be passed, but to the following functions only:<br>ReadFile<br>WriteFile<br>send<br>recv<br>TransmitFile<br>closesocket"<br></p>
+<p>Notice that <code>WSARecv</code> and <code>WSASend</code> are conspicuous by their absence, and so it <code>DisconnectEx</code>. This article assumes that this is due to a documentation bug and that <code>AcceptEx</code> is intended to operate with these functions. Either way, we're into undocumented behaviour, so if that's important to you then you may not wish to do things this way. What we've found is that it works on the platforms that we need it to work on.</p>
+<h2>Using Microsoft extension functions with WinSock</h2>
+<p>The Windows Sockets 2 specification defines an extension mechanism that allows Windows Sockets service providers to expose advanced transport functionality to application programmers. Microsoft provides several of these extension functions but by using them you are limiting your software to running on a Windows Sockets provider that supports these functions. Generally this isn't a problem...</p>
+<p>Several of the extension functions have been available since WinSock 1.1 and are exported from MSWsock.dll, however it's not advisable to link directly to this dll as this ties you to the Microsoft WinSock provider. A provider neutral way of accessing these extension functions is to load them dynamically via <code>WSAIoctl</code> using the <code>SIO_GET_EXTENSION_FUNCTION_POINTER</code> op code. This should, theoretically, allow you to access these functions from any provider that supports them...</p>
+<p>With WindowsXP Microsoft has added several new WinSock extension functions and these are only available via the <code>WSAIoctl</code> route so, in the interest of consistency and portability we'll access all of the extension functions using a simple wrapper class, <code>CMSWinSock</code>, which wraps the required calls to <code>WSAIoctl</code>.</p>
+<p><code>AcceptEx()</code> can reuse sockets that have been prepared for reuse in the appropriate way. WindowsXP provides <code>DisconnectEX()</code> as a way to prepare a socket handle for reuse. Prior to WindowsXP the only function that could prepare a socket for reuse was <code>TransmitFile()</code>. Fortunately, <code>TransmitFile()</code> could be used to prepare a socket for reuse without actually having to transmit a file... To make the code easier to understand <code>CMSWinSock</code> provides a function to disconnect a socket for reuse. <code>DisconnectSocketForReuse()</code> will call <code>DisconnectEx()</code> if it's available and otherwise call <code>TransmitFile()</code> with the appropriate arguments to simply reuse the socket.</p>
+<h2>Accepting connections with AcceptEx()</h2>
+<p>Our previous servers have used a blocking loop on <code>WSAAccept()</code> to accept connections. When a connection occurs, a socket is created and returned from the call to <code>WSAAccept()</code>, our accepting thread then loops around to call <code>WSAAccept()</code> again for the next connection. Not only is creating a socket a time consuming operation but the design means that all connection establishment must go through a single piece of code in a single thread. <code>AcceptEx()</code> uses a different model, you create your sockets first, then "post" accept requests onto the listening socket and when these requests complete you receieve IO completion packets on the associated IO Completion Port. I've no idea how this works under the hood, but at the very least, the use of an IO Completion Port for notification allows us to multi thread the work that we need to do in relation to establishing a connection.</p>
+<p>So, how many sockets do we need to create in advance and how do we know when we need to create more? The number of sockets that you need to create in advance will depend on the number of connections that your server has to handle and as such is a configurable parameter. You don't want to create too many sockets as this wastes server resources, but if you create too few then your server will run slower, or refuse connections... We keep a track of the number of sockets that we have created and as accepts complete we move the sockets from a "pending accept" list onto an "active" list. In this way we can monitor when we need to create more sockets and issue more calls to <code>AcceptEx()</code>. However, if we are expecting a client to immediately send data after it connects then the accept doesn't complete until at least one byte arrives on the connection. A malicious client could thus attempt a denial of service attack on our server by opening connections and not sending any data. This would eventually use up all of the accepts we have posted and cause our server to start to use the listen backlog queue. Eventually the server will fill the listen backlog queue and begin to reject connections attempts. To avoid this situation we can register for notification when a connection attempt occurs and there are no outstanding accepts available. When this happens the backlog queue will have queued the connection request and we can post more calls to <code>AcceptEx()</code> so that the connection will be accepted. We use <code>WSAEventSelect()</code> to register for <code>FD_ACCEPT</code> events - these are reported by an event being set. We can then structure our accept loop something like this:</p><pre>WSAEventSelect(m_listeningSocket, m_acceptEvent.GetEvent(), FD_ACCEPT);
+
+<span class="code-keyword">do</span>
+{
+   <span class="code-keyword">for</span> (size_t i = <span class="code-digit">0</span>; i &lt; numAcceptsToPost; ++i)
+   {
+      Accept();
+   }
+
+   m_postMoreAcceptsEvent.Reset();
+   m_acceptEvent.Reset();
+
+   HANDLE handlesToWaitFor[<span class="code-digit">2</span>];
+
+   handlesToWaitFor[<span class="code-digit">0</span>] = m_postMoreAcceptsEvent.GetEvent();
+   handlesToWaitFor[<span class="code-digit">1</span>] = m_acceptEvent.GetEvent();
+
+   waitResult = ::WaitForMultipleObjects(<span class="code-digit">2</span>, handlesToWaitFor, <span class="code-keyword">false</span>, INFINITE);
+
+   <span class="code-keyword">if</span> (waitResult != WAIT_OBJECT_0 &amp;&amp;
+       waitResult != WAIT_OBJECT_0 + <span class="code-digit">1</span>)
+   {
+      OnError(_T(<span class="code-string">"</span><span class="code-string">CSocketServerEx::Run() - WaitForMultipleObjects: "</span>)
+              + GetLastErrorMessage(::GetLastError()));
+   }
+
+   <span class="code-keyword">if</span> (waitResult == WAIT_OBJECT_0 + <span class="code-digit">1</span>)
+   {
+      Output(_T(<span class="code-string">"</span><span class="code-string">Accept..."</span>));
+   }
+}
+<span class="code-keyword">while</span> (waitResult == WAIT_OBJECT_0 || waitResult == WAIT_OBJECT_0 + <span class="code-digit">1</span>);
+</pre>
+<p>We've only moved the denial of service attack from causing our server to refuse connections to causing our server to run out of resources by accepting an infinite number of malicious connections. To address this problem we need to be able to determine if a socket that is pending an accept completion has had the connection established and is now waiting for data to arrive, and if it is, how long it's been waiting... For this we use <code>getsockopt()</code> with the <code>SO_CONNECT_TIME</code> option (available from Windows NT 4.0) . This returns -1 if the socket is not connected or the number of seconds that it has been connected. If, when we are informed that we need to post more accepts, we post the accepts and then check all of the pending accepts to see how long they have been connected and waiting for data then we can forcibly disconnect sockets that are "taking too long" (a configurable parameter) to send data after connecting...</p>
+<p>We now have a server that will post a configurable number of accepts when it first starts listening and, in normal operation, will post more accepts as connections complete. If we get to a point where we have no accepts pending and a connection occurs then we are informed so that we can post more accepts and check to see if any connected sockets have been waiting for data for longer than our configurable timeout.</p>
+<h2>Accepting and reading data</h2>
+<p>When calling <code>AcceptEx()</code> you must always pass a buffer to store the local and remote addresses of the resulting connection. For servers that receive data before they send data, such as web servers, for example, you can include space in this buffer for the first batch of data that is read from the connection. As we pointed out above, the accept doesn't complete until at least one byte arrives. The code could look something like this:</p><pre><span class="code-keyword">void</span> CSocketServerEx::Accept()
+{
+   Socket *pSocket = AllocateSocket();
+
+   {
+      CCriticalSection::Owner <span class="code-keyword">lock</span>(m_listManipulationSection);
+
+      m_pendingList.PushNode(pSocket);
+   }
+
+   <span class="code-comment">//</span><span class="code-comment"> allocate a buffer
+</span>   CIOBuffer *pBuffer = Allocate();
+
+   pBuffer-&gt;SetOperation(IO_Accept_Completed);
+
+   pBuffer-&gt;SetUserPtr(pSocket);
+
+   <span class="code-keyword">const</span> size_t sizeOfAddress = GetAddressSize() + <span class="code-digit">16</span>;
+   <span class="code-keyword">const</span> size_t sizeOfAddresses = <span class="code-digit">2</span> * sizeOfAddress;
+
+   DWORD bytesReceived = <span class="code-digit">0</span>;
+
+   <span class="code-keyword">if</span> (!CMSWinSock::AcceptEx(
+      m_listeningSocket,
+      pSocket-&gt;m_socket,
+      reinterpret_cast&lt;void*&gt;(const_cast&lt;BYTE*&gt;(pBuffer-&gt;GetBuffer())),
+      pBuffer-&gt;GetSize() - sizeOfAddresses,
+      sizeOfAddress,
+      sizeOfAddress,
+      &amp;bytesReceived,
+      pBuffer-&gt;GetAsOverlapped()))
+   {
+      <span class="code-keyword">const</span> DWORD lastError = ::WSAGetLastError();
+
+      <span class="code-keyword">if</span> (ERROR_IO_PENDING != lastError)
+      {
+         Output(_T(<span class="code-string">"</span><span class="code-string">CSocketServerEx::Accept() - AcceptEx: "</span>)
+                 + GetLastErrorMessage(lastError));
+
+         pSocket-&gt;Close();
+         pSocket-&gt;Release();
+         pBuffer-&gt;Release();
+      }
+   }
+   <span class="code-keyword">else</span>
+   {
+      <span class="code-comment">//</span><span class="code-comment"> Accept completed synchronously. We need to marshal the data received 
+</span>      <span class="code-comment">//</span><span class="code-comment"> over to the worker thread ourselves...
+</span>
+      m_iocp.PostStatus((ULONG_PTR)m_listeningSocket, bytesReceived,
+                        pBuffer-&gt;GetAsOverlapped());
+   }
+}
+</pre>
+<p>Note that we call up to our derived class to provide details of the size of the <code>sockaddr</code> that we need to make space for, though a default implementation simply returns <code><span class="cpp-keyword">sizeof</span>(SOCKADDR_IN)</code>. When the accept completes the socket retrieved from the completion key by our worker thread is the listening socket, since that's the device that's associated with the IO Completion Port and generating the completion packet for the accept. We require the accepted socket as well, so we store that in the IO buffer's user data slot. It's a bit crufty in the worker thread as for all other completion packets the completion key is a pointer to a <code>Socket</code>, but for accepts it's not - a special case that may get refactored away if I get the time... Note that although the expected code path is for <code>AcceptEx()</code> to return false and for <code>WSAGetLastError()</code> to return <code>ERROR_IO_PENDING</code>, we handle the case where the accept completes synchronously by posting to the completion port ourselves, and we do so with the same semantics as the asynchronously generated packet (ie listening socket as completion key). I've never actually been able to get my test harness to generate this situation...</p>
+<h2>Accepting without reading data</h2>
+<p>For server's that don't receieve data before sending we can still use <code>AcceptEx()</code>, we just specify a data buffer size of 0 and no read occurs, the accept completes as soon as the connection is established.</p>
+<h2>Accept completion</h2>
+<p>When an accept completes and, if appropriate, data arrives, an IO completion packet is posted and our worker threads complete the accept by setting the socket options on accepted socket to match those of the listening socket (normally <code>WSAAccept()</code> would do this for us, but <code>AcceptEx()</code> makes us do it ourselves using <code>setsockopt()</code> and <code>SO_UPDATE_ACCEPT_CONTEXT</code>). We then move the socket from our pending list to our active list, extract the local and remote addresses from the data buffer that we passed to <code>AcceptEx()</code> and notify the derived class of a new connection and, if appropriate, new data.</p>
+<h2>The derived class interface</h2>
+<p>The derived class is almost as straight forward as the one in the previous article except that you can override the creation of the accepted socket and you can override the amount of space you need to reserve for the local and remote addresses (in case you're using a protocol other than TCP/IP).</p>
+<h2>The example...</h2>
+<p>The example server is another simple echo server, I know what I said about echo servers, but in this case it's an ok example <img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/smiley_smile.gif" align="top" alt="Smile | :)"> . The server contains two instances of the socket server class and listens on 5001 and 5002. On 5001 it performs an accept that requires data to arrive before it will complete and on 5002 it performs an accept that returns straight after the connection is established. Note that the server shows how you can package multiple socket servers in the same executable (perhaps one day I'll optimise the class so that all servers are handled by a single pool of IO threads...).</p>
+<p>To test the server, telnet to localhost 5001/2 and type some data. If you telnet to 5001 a few times and dont type any data then you should be able to see the <code>FD_ACCEPT</code> notification and connection timeout checking in operation. As always, the ServerShutdown program lets you pause, resume and shutdown the server.</p>
+<h2>Revision history</h2>
+<ul>
+<li>3rd Jun 2002 - Initial revision. 
+</li><li>26th June 2002 - Removed call to <code>ReuseAddress</code>() during the creation of the listening socket as it not required - Thanks to Alun Jones for pointing this out to me. 
+</li><li>28th June 2002 - Adjusted how we handle socket closure. We now issue async disconnects. 
+</li><li>30th June 2002 - Removed the requirement for users to subclass the socket server's worker thread class. All of the work can now be done by simply subclassing the socket server class. 
+</li><li>15th July 2002 - Socket closure notifications now occur when the server shuts down whilst there are active connections. <code>SocketServer</code> can now be set to ensure read and write packet sequences 
+</li><li>19th July 2002 - Merged with latest Socket Server code - still need to do the refactoring job to remove the duplication. Tweaked the <code>AcceptEx</code> repost logic so that the server runs 'smoother'. Updated the article to indicate the undocumented nature of the example code. </li></ul>
+
+
+						</div>
+						
+
+						<div class="float-right" style="margin:20px 0 0 10px;border:1px solid #ccc">
+						
+						</div>
+                        
+                        
+						
+						<h2>License</h2>
+						<div id="LicenseTerms"><p>This article, along with any associated source code and files, is licensed under <a href="http://www.codeproject.com/info/cpol10.aspx" rel="license">The Code Project Open License (CPOL)</a></p></div>
+						
+
+                        
+						<h2>Share</h2>
+				        <div class="share-list">
+					        
+				        </div> 
+    			        
+
+
+						
+						<h2 id="ctl00_AboutHeading">About the Author</h2>
+						    
+
+
+<div class="author-wrapper">
+
+    <div class="pic-wrapper"> 
+        <img id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberPhoto" class="profile-pic" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/member_unknown.gif" style="border-width:0px;transform:rotate(-3deg);">
+
+    </div>
+
+    <div class="container-member">  
+        <b><a id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberProfileLink" class="author" href="http://www.codeproject.com/Members/Len-Holgate">Len Holgate</a></b>
+
+        <table class="extended">
+        <tbody><tr>
+            <td rowspan="2" nowrap="" valign="middle">
+            
+            </td>
+            <td width="100%">
+                <div class="company">
+                    <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberJobTitle">Software Developer (Senior)</span>
+	                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberCompany">JetByte Limited</span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberLocation">United Kingdom <img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/GB.gif" alt="United Kingdom" width="16px" height="11px"></span>
+            </td>
+        </tr>
+        </tbody></table>
+    </div>
+
+    <div class="description">
+        Len has been programming for over 30 years, having first started with a <a rel="nofollow" href="http://www.apj.co.uk/zx80/zx80_main_h.htm">Sinclair ZX-80</a>. Now he runs his own consulting company, <a rel="nofollow" href="http://www.jetbyte.com/">JetByte Limited</a> and has a technical blog <a rel="nofollow" href="http://www.lenholgate.com/">here</a>.<br>
+<br>
+JetByte provides contract programming and consultancy services. We can provide experience in COM, Corba, C++, Windows NT and UNIX. Our speciality is the design and implementation of systems but we are happy to work with you throughout the entire project life-cycle. We are happy to quote for fixed price work, or, if required, can work for an hourly rate. <br>
+<br>
+We are based in London, England, but, thanks to the Internet, we can work 'virtually' anywhere...<br>
+<br>
+Please note that many of the articles here may have updated code available on Len's <a rel="nofollow" href="http://www.lenholgate.com/">blog</a> and that the IOCP socket server framework is also available in a licensed, much improved and fully supported version, see <a rel="nofollow" href="http://www.serverframework.com/">here</a> for details.
+
+        
+    </div>
+
+</div><br>
+						
+						
+
+						<div class="clearfix"></div>
+
+						<div style="padding-top:8px">
+							
+						</div>
+
+					
+
+				    
+					</form>
+
+				</div>
+
+				
+				<div class="bottom-promo"> 
+				    
+				</div>
+				
+
+                
+        <h2 id="ctl00_AlsoRead_RelatedResults_ctl00_Header" class="also-read">You may also be interested in...</h2>
+        <table class="spaced content-list also-read">
+    
+	    <tbody><tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Thumbnail" href="http://www.codeproject.com/Articles/1082381/Building-Modern-Web-Apps-with-ASP-NET-MVC"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Link" href="http://www.codeproject.com/Articles/1082381/Building-Modern-Web-Apps-with-ASP-NET-MVC">Building Modern Web Apps with ASP.NET MVC 6</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Thumbnail" href="http://www.codeproject.com/Articles/1085650/Hack-Grunt-to-Make-Your-Website-Awesome"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Link" href="http://www.codeproject.com/Articles/1085650/Hack-Grunt-to-Make-Your-Website-Awesome">Hack Grunt to Make Your Website Awesome</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Thumbnail" href="http://www.codeproject.com/Articles/1082383/Make-your-website-mobile-friendly-using-Bootstrap"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Link" href="http://www.codeproject.com/Articles/1082383/Make-your-website-mobile-friendly-using-Bootstrap">Make your website mobile friendly using Bootstrap</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Thumbnail" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/Thumb-1086365.jpg" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Link" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT">The Past, Present, and Future of IoT</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Thumbnail" href="http://www.codeproject.com/Articles/1086350/Case-Study-Build-a-Smart-Conference-System-by-Enab"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/Thumb-1086350.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Link" href="http://www.codeproject.com/Articles/1086350/Case-Study-Build-a-Smart-Conference-System-by-Enab">Case Study：Build a Smart Conference System by Enabling ZigBee on the Intel® Edison Platform</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Thumbnail" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Link" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers">The Microsoft Cloud Platform for Developers</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+		</tbody></table>
+	
+
+
+
+				
+				
+
+					<h2>Comments and Discussions</h2>
+					
+					<p><img alt="Comment" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/NewComment.gif" width="12px" height="16px">
+					<b>270 messages</b> have been posted for this article 
+					Visit <b><a id="ctl00_ArticleLink" href="http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class">http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class</a></b> to post and view comments on 
+					this article, or click <b><a id="ctl00_PrintWithMessage" href="http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class?display=PrintAll">here</a></b> 
+					to get a print view with messages.</p>
+					
+				
+
+			</div>
+			
+		</td>
+		<td width="170px" class="article-wing-right">
+			
+		</td>
+		</tr></tbody></table>
+
+		
+		<div class="theme1-background" style="height:2px" id="stickyStop"></div>
+
+		<div class="extended tiny-text">
+			<div class="row">
+				<div class="float-left">
+					<a id="ctl00_PermaLink" itemprop="url" href="http://www.codeproject.com/Articles/2374/A-reusable-high-performance-socket-server-class">Permalink</a> | 
+					<a id="ctl00_AdvertiseLink" href="http://developermedia.com/">Advertise </a> |
+					<a id="ctl00_PrivacyLink" href="http://www.codeproject.com/info/privacy.aspx">Privacy</a> |
+                    <a id="ctl00_TermsOfUseLink" href="http://www.codeproject.com/info/TermsOfUse.aspx">Terms of Use</a> |
+					<a id="ctl00_Mobile">Mobile</a>
+					<br>
+								
+					
+					Web02 |
+					2.8.160311.1 |
+					Last Updated 19 Jul 2002								
+				</div>
+
+                <div id="ctl00_GoogleTranslate" class="translate float-left"><div class="skiptranslate goog-te-gadget" dir="ltr"><div id=":0.targetLanguage" class="goog-te-gadget-simple" style="white-space: nowrap;"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/cleardot.gif" class="goog-te-gadget-icon" style="background-image: url(&quot;https://translate.googleapis.com/translate_static/img/te_ctrl3.gif&quot;); background-position: -65px 0px;"><span style="vertical-align: middle;"><a class="goog-te-menu-value" href="javascript:void(0)"><span>选择语言</span><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/cleardot.gif" width="1" height="1"><span style="border-left-width: 1px; border-left-style: solid; border-left-color: rgb(187, 187, 187);">​</span><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/cleardot.gif" width="1" height="1"><span style="color: rgb(155, 155, 155);">▼</span></a></span></div></div></div>      
+
+				<div class="float-right align-right">
+					Article Copyright 2002 by Len Holgate<br>Everything else
+					Copyright © <a href="mailto:webmaster@codeproject.com">CodeProject</a>, 1999-2016 <br>
+				</div>
+
+				
+
+			</div>
+		</div>
+		
+
+		<br clear="all">
+		
+			
+
+	</div> 
+	</div>
+</div>
+
+
+
+
+
+
+<script type="text/javascript" language="Javascript" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/jquery.min.js"></script><script type="text/javascript">//<![CDATA[
+if (typeof jQuery == 'undefined') {
+    document.write(unescape("%3Cscript src='/script/JS/jquery-1.6.2.min.js' type='text/javascript' %3E%3C/script%3E"));
+}//]]></script>
+<script type="text/javascript" language="Javascript" src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/element.js"></script>
+<script type="text/javascript" language="Javascript">//<![CDATA[
+$(document).ready(function () { processCodeBlocks.Initialise('#contentdiv'); });
+function googleTranslateElementInit() {  new google.translate.TranslateElement({   pageLanguage: 'en',   layout: google.translate.TranslateElement.InlineLayout.SIMPLE,   autoDisplay: false,   gaTrack: true,   gaId: 'UA-1735123-1'},  'ctl00_GoogleTranslate');}
+$(document).ready(function() { anchorAnimate();
+});
+
+//]]>
+</script><div id="goog-gt-tt" class="skiptranslate" dir="ltr"><div style="padding: 8px;"><div><div class="logo"><img src="./A reusable, high performance, socket server class - Part 3 - CodeProject_files/translate_24dp.png" width="20" height="20"></div></div></div><div class="top" style="padding: 8px; float: left; width: 100%;"><h1 class="title gray">原文</h1></div><div class="middle" style="padding: 8px;"><div class="original-text"></div></div><div class="bottom" style="padding: 8px;"><div class="activity-links"><span class="activity-link">提供更好的翻译建议</span><span class="activity-link"></span></div><div class="started-activity-container"><hr style="color: #CCC; background-color: #CCC; height: 1px; border: none;"><div class="activity-root"></div></div></div><div class="status-message" style="display: none;"></div></div>
+
+
+
+<iframe frameborder="0" class="goog-te-menu-frame skiptranslate" style="visibility: visible; box-sizing: content-box; width: 937px; height: 263px; display: none;"></iframe></body></html>

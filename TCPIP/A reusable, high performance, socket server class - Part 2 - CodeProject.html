@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<!-- saved from url=(0102)http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class?display=Print -->
+<html style="height: 100%;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>A reusable, high performance, socket server class - Part 2 - CodeProject</title> 
+	<link type="text/css" rel="stylesheet" href="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/Main.min.css">
+
+	
+
+<meta name="Description" content="To maintain performance a socket server shouldn&#39;t make blocking calls from its IO threads. This article builds on the previous one to add a business logic thread pool to our example server.; Author: Len Holgate; Updated: 18 Aug 2002; Section: Internet / Network; Chapter: General Programming; Updated: 18 Aug 2002">
+<meta name="Keywords" content="VC6, VC7, Win2K, WinXP, C++, Windows, Visual-Studio, MFC, Dev, Intermediate,Internet / Network,General Programming,Free source code, tutorials">
+<meta name="Author" content="Len Holgate">
+<meta name="Rating" content="General">
+<meta name="Revisit-After" content="1 days">
+<meta name="application-name" content="CodeProject">
+<meta name="google-translate-customization" content="d908bb7ce7aff658-4c2f3a504525c916-g629383f736781a8a-13">
+
+<link rel="dns-prefetch" href="http://ajax.googleapis.com/"> 
+
+
+
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - All Topics" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=1">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Android" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=22">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - iOS" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=25">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C++" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=2">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C#" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=3">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Web" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=23">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Lounge Postings" href="http://www.codeproject.com/webservices/LoungeRSS.aspx">
+<meta name="robots" content="index, follow">
+<link rel="search" type="application/opensearchdescription+xml" title="CodeProject" href="http://www.codeproject.com/info/OpenSearch.xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!--<base target="_top">--><base href="." target="_top">
+	<link rel="icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="shortcut icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="apple-touch-icon" href="http://www.codeproject.com/images/FavIcon-Apple.png" type="image/png">
+<script type="text/javascript" language="Javascript">//<![CDATA[
+function defrm () { /* thanks twitter */ document.write = ''; window.top.location = window.self.location;  setTimeout(function() { document.body.innerHTML = ''; }, 0);  window.self.onload = function(evt) { document.body.innerHTML = ''; }; }if (window.top !== window.self) {  try {  if (window.top.location.host) { /* will throw */ } else { defrm(); /* chrome */ }  } catch (ex) { defrm(); /* everyone else */ } }if (typeof(DemoUrl)!='undefined')   document.write(unescape('%3Cme')+'ta http'+'-equiv="re'+'fresh"                  con'+'tent="1;url='+DemoUrl+unescape('"%3CE'));
+
+//]]>
+</script>
+
+	
+
+
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-1735123-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_setDomainName', 'www.codeproject.com']);
+	_gaq.push(['_setSessionTimeout', '1200']); 
+
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+	})(); 
+</script><script type="text/javascript" async="" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/ga.js"></script>
+
+
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/translateelement.css"><script type="text/javascript" charset="UTF-8" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/main_zh-CN.js"></script><script type="text/javascript" charset="UTF-8" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/element_main.js"></script></head>	
+
+<body class="chrome chrome47 touch" style="position: relative; min-height: 100%; top: 0px;">
+
+<a class="access-link" href="http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class?display=Print#Main"><img alt="Click here to Skip to main content" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/t.gif"></a>
+
+
+
+
+
+<div class="page-background">
+
+	
+	
+
+	
+
+	
+    <div id="ctl00_STM" class="site-top-menu fluid">
+        <div class="main-content">
+            
+        </div>
+    </div>
+
+	
+    <div id="ctl00_SH" class="site-header fluid">
+        <div class="main-content">
+            <div class="logo"><a href="http://www.codeproject.com/"><img id="ctl00_Logo" tabindex="1" title="CodeProject" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/logo250x135.gif" alt="Home" style="height:135px;width:250px;border-width:0px;"></a></div>
+            <div class="promo"></div>
+        </div>
+    </div>
+
+	<a href="http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class?display=Print#Main"><img alt="Click here to Skip to main content" class="access-link" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/t.gif"></a>
+
+	
+			
+	
+
+	<div id="A" class="container-content-wrap fluid print"> 
+
+	<div itemscope="" itemtype="http://schema.org/Article" class="container-content"> 
+
+
+		<div class="clearfix">
+			<div class="container-breadcrumb float-left ">
+				<div><a href="http://www.codeproject.com/script/Content/SiteMap.aspx">Articles</a> » <a href="http://www.codeproject.com/Chapters/6/General-Programming.aspx">General Programming</a> » <a href="http://www.codeproject.com/KB/IP/"><span itemprop="articleSection">Internet / Network</span></a> » <a href="http://www.codeproject.com/KB/IP/#Beginners">Beginners</a></div>
+			</div>
+
+			<div class="float-left">
+				
+			</div>
+
+			<div class="edit-links float-right">
+				
+			</div>
+
+			<div class="article-nav float-right">
+					
+		        
+		        
+					
+
+                
+				
+			</div>
+		</div>
+
+		<table class="extended container-article-parts" cellpadding="0" cellspacing="0">
+        <tbody><tr valign="top">
+		<td width="117px" class="article-wing-left">
+
+			
+
+		</td>
+		<td>
+			
+			<div id="AT" class="container-article  fluid tight"> 
+
+				<div class="article">
+
+					<form name="aspnetForm" method="post" action="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/A reusable, high performance, socket server class - Part 2 - CodeProject.html" id="aspnetForm" style="margin:0;padding:0">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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">
+</div>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="10C1FD69">
+</div>
+
+					
+					 
+					<div class="header">
+					    <a name="Main"></a>
+
+					    
+					    <a name="_articleTop" id="_articleTop"></a>
+					    <div class="title">
+					        
+					        <h1 id="ctl00_ArticleTitle" itemprop="name">A reusable, high performance, socket server class - Part 2</h1> 
+					    </div>
+
+                        <div style="height:34px">
+					        
+					        <div class="entry float-left">
+                                
+                                <div class="float-left">
+
+						            <span class="author"><a href="http://www.codeproject.com/script/Membership/View.aspx?mid=133" rel="author"><span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><span itemprop="name">Len Holgate</span></span></a></span>, 
+						            <span class="date" itemprop="dateModified" title="Date last updated" content="2002-08-18 00:00:00">
+							            18 Aug 2002</span>
+			
+                                    <a id="ctl00_LicenseLink" title="The Code Project Open License (CPOL)" class="license" href="http://www.codeproject.com/info/cpol10.aspx">CPOL</a><div id="ctl00_CurRat" class="tooltip anchorLink" style="cursor:pointer;margin-top: 5px">
+				
+							            
+
+<table cellpadding="0" cellspacing="0" class="small-text" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating"> 
+<tbody><tr>
+	
+	<td class="nowrap">
+
+		
+			<meta itemprop="bestRating" content="5"> 
+			<meta itemprop="worstRating" content="1">
+		
+
+		<span id="ctl00_ArticleRating_VI">
+		<div class="nowrap rating-stars-medium" style="height:18px;width:80px;position:relative;">
+	<div class="clipped align-left float-left" style="height:16px;width:74px;">
+		<img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/stars-fill-md.png" style="border-width:0px;">
+	</div><div class="clipped" style="height:16px;width:6px;position:relative;">
+		<img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/stars-empty-md.png" style="border-width:0px;position:absolute;top:0;right:0;">
+	</div>
+</div>
+		</span>
+
+		
+	</td>
+	
+	<td id="ctl00_ArticleRating_VR" class="nowrap">
+		&nbsp;
+		<span id="ctl00_ArticleRating_VotesR">&nbsp;<span itemprop="ratingValue" class="rating">4.68</span> (<span itemprop="ratingCount" class="count">56</span> votes)</span>
+		
+	</td>
+
+</tr>
+
+</tbody></table>
+
+
+							            <div id="ctl00_RB" class="speech-bubble-container-up">
+								            <div class="speech-bubble-up" style="width:150px !important">
+									                        
+<div>
+<table class="feature" width="100%" height="20px" title="Voting Distribution. Recent data only" cellpadding="0" cellspacing="0"><tbody><tr class="chart-row"><td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="2 votes, 6.3%" title="2 votes, 6.3%"></div><span title="2 votes">1</span></td>
+<td class="chart-column"><span title="0 votes">2</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="1 vote, 3.1%" title="1 vote, 3.1%"></div><span title="1 vote">3</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/pollcol.gif" width="20pxpx" height="4px" border="0px" alt="5 votes, 15.6%" title="5 votes, 15.6%"></div><span title="5 votes">4</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/pollcol.gif" width="20pxpx" height="20px" border="0px" alt="24 votes, 75.0%" title="24 votes, 75.0%"></div><span title="24 votes">5</span></td>
+</tr></tbody></table><div class="small-text align-center">4.68/5 - 56 votes</div><div class="small-text align-center subdue">2 removed</div><div class="small-text align-center subdue">μ 4.49, σ<sub>a</sub> 1.86 [<a href="http://www.codeproject.com/KB/FAQs/RatingReputationFAQ.aspx#noisefilter">?</a>]</div>
+</div>
+								            </div>
+								            <div class="speech-bubble-pointer-up">
+									            <div class="speech-bubble-pointer-up-inner"></div>
+								            </div>
+							            </div>
+						            </div>
+                                </div>
+					        </div>
+
+                            
+						    
+						    	
+                        </div>
+
+   					    
+                        <div id="ctl00_description" class="summary" itemprop="headline">To maintain performance a socket server shouldn't make blocking calls from its IO threads. This article builds on the previous one to add a business logic thread pool to our example server.</div><span id="ctl00_thumbnailUrl" class="date" itemprop="image" content="https://codeproject.global.ssl.fastly.net/script/Articles/Images/article100x80.png"></span>			
+
+                    </div>
+                    
+					
+					
+
+					
+
+					
+					
+					
+
+						
+					
+
+					
+
+						
+						<div id="contentdiv" class="text" itemprop="articleBody">
+						
+
+
+
+<p>The following source was built using Visual Studio 6.0 SP5 and Visual Studio .NET. You need to have
+a version of the <a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">Microsoft Platform 
+SDK</a> installed</p>
+<p>Note that the debug builds of the code waste a lot of CPU cycles due to the the debug trace output. 
+It's only worth profiling the release builds.</p>
+<ul class="download">
+<li><a href="http://www.codeproject.com/KB/IP/JBSocketServer2/JBSocketServer4.zip">JBSocketServer4.zip - a dummy POP3 server with a business logic thread pool - 92 Kb </a></li>
+<li><a href="http://www.codeproject.com/Articles/2337/JBSocketServer3/JBServerShutdown.zip">JBSocketShutdown.zip - an off switch for the servers - 42 Kb </a></li>
+</ul>
+
+<h2>Overview</h2>
+<p>In the previous <a href="http://www.codeproject.com/KB/IP/JBSocketServer1.asp">article</a>
+we designed a reusable socket server class to make writing high performance
+socket based servers easy. We presented a series of simple examples, from the humble echo server through
+to some slightly more real-world packet echo server and a fake POP3 server. This article continues
+to make the example server more usable in the real-world by adding a business logic thread pool to 
+the server so that messages are processed by a thread that isn't part of the IO thread pool. This helps
+to maintain the scalability and performance of the server by moving potentially blocking work off into
+its own thread pool.</p>
+<h2>Why do we need another thread pool</h2>
+<p>To be able to handle variable load it's often useful to have a thread pool that can be expanded and
+contracted depending on the current load on the server. As we pointed out in the last article, all of our 
+asynchronous socket IO is handled by the socket server's thread pool. The threads in this pool cannot 
+be terminated whilst they have outstanding IO operations or the operations will be terminated. This means
+that the socket server's thread pool cannot shrink without us keeping track of the IO operations
+associated with a particular worker thread and only allowing the thread to terminate when all IO operations
+have completed. To maintain performance we need to make sure that the threads in the socket server's 
+thread pool do not block, there are a finite number of them and if they all block then no socket IO
+will occur until they unblock. The easiest way to ensure that the IO threads don't block is to move
+the business logic processing out of the IO thread pool and into a new thread pool. The IO threads
+then simply handle the IO, chunk the data stream into messages and pass the messages off to the business
+logic thread pool.</p>
+<h2>A business logic thread pool</h2>
+<p>Our requirements for the business logic thread pool are that it should be flexible and capable of
+increasing and decreasing the number of worker threads as the load on the server dictates. Passing work
+items into the thread pool should be a non blocking operation so that the IO threads can operate at 
+maximum efficiency but we need to be able to know when a work item hasn't been picked up by a thread
+within a certain time period so that we can add more threads to the pool. We also need to keep a track
+off the number of idle threads that we have and, every so often, reduce the number of threads in the pool
+to conserve resources in times of low server loading.</p>
+<p>As you would probably expect, the thread pool uses IO Completion Ports to dispatch work items to
+worker threads. To be able to monitor how long a work item takes to be processed and therefore be able
+to work out when we need to add more threads to the pool we use an event. When we dispatch a work item
+to the IO Completion Port we wait on the event for a configurable timeout period. When a thread picks
+up a work item from the completion port the first thing that it does is signal the event. If all threads
+are busy when we dispatch our work item our timeout may expire before a thread signals the event. In this
+case we may wish to add another thread to the pool to deal with the work load. The dispatch code could 
+look something like this:</p>
+<pre><span class="code-keyword">void</span> CThreadPool::HandleDispatch(
+   ULONG_PTR completionKey,
+   DWORD dwNumBytes,
+   OVERLAPPED *pOverlapped)
+{
+   m_dispatchCompleteEvent.Reset();
+
+   <span class="code-keyword">bool</span> processed = <span class="code-keyword">false</span>;
+
+   m_workPort.PostStatus(completionKey, dwNumBytes, pOverlapped);
+
+   <span class="code-comment">//</span><span class="code-comment"> wait for someone to toggle the 'got message' event?
+</span>
+   <span class="code-keyword">bool</span> threadStarted = <span class="code-keyword">false</span>;
+
+   <span class="code-keyword">while</span> (!processed)
+   {
+      DWORD result = m_dispatchCompleteEvent.Wait(m_timeoutMillis);
+
+      <span class="code-keyword">if</span> (result == WAIT_OBJECT_0)
+      {
+         processed = <span class="code-keyword">true</span>;
+      }
+      <span class="code-keyword">else</span> <span class="code-keyword">if</span> (result == WAIT_TIMEOUT)
+      {
+         <span class="code-keyword">if</span> (!threadStarted &amp;&amp; m_processingThreads == m_activeThreads &amp;&amp;
+             (size_t)m_activeThreads &lt; m_maxThreads)
+         {
+            StartWorkerThread();
+
+            threadStarted = <span class="code-keyword">true</span>;
+         }
+      }
+      <span class="code-keyword">else</span>
+      {
+         <span class="code-keyword">throw</span> CWin32Exception(_T(<span class="code-string">"</span><span class="code-string">CThreadPool::Dispatch()"</span>),
+                               GetLastError());
+      }
+   }
+}
+</pre>
+<p>Whilst there are threads available to process the work items we don't need to start new threads. As
+soon as all of the threads in the pool are active we may timeout during the dispatch and then, if we're
+not already running with the maximum number of threads that we've been configured for, we start a new
+thread. The actual code is slightly more complex as it handles shutdown requests and adjusts the 
+timeout when we're already running at our maximum number of threads. The dispatcher needs to know
+how many threads we have in the pool and how many of those threads are processing so each worker thread
+calls back to the thread pool to let the pool know what state it's in.</p>
+<p>The problem with this piece of work item dispatch code is that it doesn't fulfill our requirement
+of being able to dispatch a work item to the pool in a non blocking fashion. To achieve that, we add 
+another level of indirection, and another IO Completion Port.</p>
+<h2>Non blocking dispatch</h2>
+<p>To ensure that users wishing to dispatch a work item to the thread pool can do so without blocking
+we implement the user level dispatch function as follows:</p>
+<pre><span class="code-keyword">void</span> CThreadPool::Dispatch(
+   ULONG_PTR completionKey,
+   DWORD dwNumBytes <span class="code-comment">/*</span><span class="code-comment">= 0*/</span>,
+   OVERLAPPED *pOverlapped <span class="code-comment">/*</span><span class="code-comment">= 0*/</span>)
+{
+   <span class="code-keyword">if</span> (completionKey == <span class="code-digit">0</span>)
+   {
+      <span class="code-keyword">throw</span> CException(_T(<span class="code-string">"</span><span class="code-string">CThreadPool::Dispatch()"</span>),
+                    _T(<span class="code-string">"</span><span class="code-string">0 is an invalid value for completionKey"</span>));
+   }
+
+   m_dispatchPort.PostStatus(completionKey, dwNumBytes, pOverlapped);
+}
+</pre>
+<p>The restriction on 0 valued completion keys is unfortunate but allows us to shut down the thread pool's
+dispatch thread by posting a 0 to its completion port. The thread pool now has two IO Completion Ports. The 
+dispatch port is serviced by a single maintenance thread which executes the <code>HandleDispatch()</code> 
+method to dispatch work items to the worker threads. Users dispatch without blocking and the maintenance thread
+dispatches in a blocking manner so that it can expand the thread pool when it needs to. The work item
+port is serviced by a variable number of threads. We've seen how we know when we need to expand the
+number of threads, now we'll look at how we reduce the number of threads when the work load is low.</p>
+<h2>Shutting down dormant threads</h2>
+<p>Often work items come in batches, the thread pool gets busy, expands, services all of the work items and 
+then becomes less busy. At this point the pool contains threads which aren't being used but which are
+still consuming resources. These dormant threads can be safely shutdown as the pool can expand again as 
+load increases. The question is, how do we decide when to shut down some threads?</p>
+<p>The maintenance thread that handles our blocking dispatch also handles checking for dormant threads.
+Every so often (a configurable amount) the maintenance thread uses an algorithm to determine if it 
+should shut some threads down. The current algorithm is as follows:</p>
+<pre><span class="code-keyword">void</span> CThreadPool::HandleDormantThreads()
+{
+   <span class="code-keyword">if</span> ((<span class="code-sdkkeyword">size_t</span>)m_activeThreads &gt; m_minThreads)
+   {
+      <span class="code-keyword">const</span> <span class="code-sdkkeyword">size_t</span> dormantThreads = m_activeThreads - m_processingThreads;
+
+      <span class="code-keyword">if</span> (dormantThreads &gt; m_maxDormantThreads)
+      {
+         <span class="code-keyword">const</span> <span class="code-sdkkeyword">size_t</span> threadsToShutdown =
+                         (dormantThreads - m_maxDormantThreads) / <span class="code-digit">2</span> + <span class="code-digit">1</span>;
+
+         StopWorkerThreads(threadsToShutdown);
+      }
+   }
+}
+</pre>
+<p>If we have more threads than the minimum number we're allowed to have, find out how many threads
+aren't currently processing work items and if that number is more than the number of dormant threads
+that we're allowed to have, shut half of them down (rounding up). Stopping worker threads is a simple 
+case of posting an IO completion key of 0 to the work port for each worker thread that we want to 
+shut down.</p>
+<h2>Doing the work</h2>
+<p>We now have a thread pool that fulfills our requirements of automatic expansion and contraction
+depending upon load and non blocking dispatch for users. The remaining thing to do is allow the derived
+class to provide its own <code>WorkerThread
+</code> class to do the work. The worker thread class must implement the
+following interface:</p>
+<pre><span class="code-keyword">virtual</span> <span class="code-keyword">bool</span> Initialise();
+
+<span class="code-keyword">virtual</span> <span class="code-keyword">void</span> Process(
+   ULONG_PTR completionKey,
+   DWORD dwNumBytes,
+   OVERLAPPED *pOverlapped) = <span class="code-digit">0</span>;
+
+<span class="code-keyword">virtual</span> <span class="code-keyword">void</span> Shutdown();
+</pre>
+<p><code>Initialise()</code> is called when it's first created, <code>Shutdown()</code> is called when 
+the thread is terminating and <code>Process()</code> is called for each work item.</p>
+<h2>A socket server with a business logic thread pool</h2>
+<p>Now that we have a suitable thread pool we can integrate it with our fake POP3 socket server so that 
+the actual processing of commands can occur in the business logic pool whilst the IO pool is left to get
+on with the IO operations. We can also move socket closure off to the business logic pool so that we 
+don't block the IO threads with a lingering socket close.</p>
+<p>The first thing we need to do is create and configure our thread pool. Then we can pass a reference 
+to it to our socket server class so that it can pass a reference to it to our IO threads.</p>
+<pre>CThreadPool pool(
+   <span class="code-digit">5</span>,                    <span class="code-comment">//</span><span class="code-comment"> initial number of threads to create
+</span>   <span class="code-digit">5</span>,                    <span class="code-comment">//</span><span class="code-comment"> minimum number of threads to keep in the pool
+</span>   <span class="code-digit">10</span>,                   <span class="code-comment">//</span><span class="code-comment"> maximum number of threads in the pool
+</span>   <span class="code-digit">5</span>,                    <span class="code-comment">//</span><span class="code-comment"> maximum number of "dormant" threads
+</span>   <span class="code-digit">5000</span>,                 <span class="code-comment">//</span><span class="code-comment"> pool maintenance period (millis)
+</span>   <span class="code-digit">100</span>,                  <span class="code-comment">//</span><span class="code-comment"> dispatch timeout (millis)
+</span>   <span class="code-digit">10000</span>);               <span class="code-comment">//</span><span class="code-comment"> dispatch timeout for when pool is at max threads
+</span>
+pool.Start();
+
+CSocketServer server(
+   INADDR_ANY,          <span class="code-comment">//</span><span class="code-comment"> address to listen on
+</span>   <span class="code-digit">5001</span>,                <span class="code-comment">//</span><span class="code-comment"> port to listen on
+</span>   <span class="code-digit">10</span>,                  <span class="code-comment">//</span><span class="code-comment"> max number of sockets to keep in the pool
+</span>   <span class="code-digit">10</span>,                  <span class="code-comment">//</span><span class="code-comment"> max number of buffers to keep in the pool
+</span>   <span class="code-digit">1024</span>,                <span class="code-comment">//</span><span class="code-comment"> buffer size 
+</span>   pool);
+
+server.Start();
+</pre>
+<p>When our socket server has a complete, distinct, message to process it can dispatch it
+to the thread pool for processing, rather than processing it on one of its IO threads.</p>
+<pre><span class="code-keyword">void</span> CSocketServer::ProcessCommand(
+   CSocketServer::Socket *pSocket,
+   CIOBuffer *pBuffer)
+{
+   pSocket-&gt;AddRef();
+   pBuffer-&gt;AddRef();
+
+   m_pool.Dispatch(reinterpret_cast&lt;ULONG_PTR&gt;(pSocket),
+                   <span class="code-digit">0</span>, pBuffer-&gt;GetAsOverlapped());
+}
+</pre>
+<p>Since we're passing the socket and IO buffer to another thread we have to increment their reference 
+counts so that they don't get cleared up from underneath us. Over in our business logic thread we can
+finally process the message, and then release the references we took on the socket and IO buffer.</p>
+<pre><span class="code-keyword">void</span> CThreadPoolWorkerThread::Process(
+   ULONG_PTR completionKey,
+   DWORD operation,
+   OVERLAPPED *pOverlapped)
+{
+   Socket *pSocket = reinterpret_cast&lt;Socket *&gt;(completionKey);
+   CIOBuffer *pBuffer = CIOBuffer::FromOverlapped(pOverlapped);
+   
+   ProcessMessage(pSocket, pBuffer);
+
+   pSocket-&gt;Release();
+   pBuffer-&gt;Release();
+}
+</pre>
+<p>Since the socket class marshals all IO requests back to the IO thread pool we can safely make read
+and write requests from our business logic thread even though the thread may be terminated before the
+IO requests completes.</p>
+<h2>Maintaining per-connection state</h2>
+<p>The final thing that our server may need to do is associate some internal server state with a 
+particular socket connection, the <code>Socket</code> class makes this particularly easy as it provides  
+the following member functions:</p>
+<pre><span class="code-keyword">void</span> *GetUserPtr() <span class="code-keyword">const</span>;
+
+<span class="code-keyword">void</span> SetUserPtr(<span class="code-keyword">void</span> *pData);
+
+<span class="code-keyword">unsigned</span> <span class="code-keyword">long</span> GetUserData() <span class="code-keyword">const</span>;
+
+<span class="code-keyword">void</span> SetUserData(<span class="code-keyword">unsigned</span> <span class="code-keyword">long</span> data);
+</pre>
+<p>These provide access to a single <code><span class="cpp-keyword">void</span> *</code> user data pointer which is stored in the 
+<code>Socket</code>. The common usage pattern for this user data is as follows: When the connection is 
+established the socket server is notified by <code>OnConnectionEstablished()</code>, the server can 
+allocate a new per-connection data structure and associate it with the socket passed to 
+<code>OnConnectionEstablished()</code> by calling <code>SetUserPtr()</code>, in subsequent
+read and write completions the pointer to the per-connection user data structure can be extracted with
+<code>GetUserPtr()</code>. When the connection is terminated the server is notified by 
+<code>OnConnectionClosed</code> and the per-connection user data can be retrieved and deleted.</p>
+<p>Although there are two versions of the user data access functions, one for a <code><span class="cpp-keyword">void</span> *</code> and 
+one for an <code><span class="cpp-keyword">unsigned</span> <span class="cpp-keyword">long</span></code> there is only a single storage location. The two versions are 
+merely for convenience and to reduce casting if the user data required is simply an index into an 
+internal server structure rather than a pointer.</p>
+<p>The example server marshals the <code>OnConnectionEstablished()</code> and 
+<code>OnConnectionClosed()</code> calls across to the business logic thread pool and maintains some 
+fairly trivial per-connection user data there. The data we maintain is the address of the client 
+connection (obtained from the buffer passed into <code>OnConnectionEstablished()</code> and the number 
+of messages that have been processed on this particular connection.</p>
+<h2>The complete example</h2>
+<p>The shell of a POP3 server which performs its business logic processing in a separate
+thread pool to 
+its IO can be downloaded from 
+<a href="http://www.codeproject.com/KB/IP/JBSocketServer2/JBSocketServer4.zip">here</a>. 
+The server has a call to
+<code>::Sleep()</code> within its message processing code so that the processing takes some time and 
+blocks. Notice how the IO on other connections is unaffected by this, and, if you want, add a similar 
+call to the server we developed at the end of the last article and compare the behavior.</p>
+<p>As with the other examples, simply telnet to localhost 5001 to test the server. The server runs 
+until a named event is set and then shuts down. The very simple Server Shutdown program, available 
+<a href="http://www.codeproject.com/KB/IP/JBSocketServer2/JBServerShutdown.zip">here</a>, provides the 
+off switch.</p>
+
+<h2>Revision history</h2>
+<ul>
+<li>21st May 2002 - Initial revision. </li>
+<li>27th May 2002 - Added pause/resume functionality to all servers and the server shutdown program. Use
+  <code>CSocket
+</code> to protect from resource leaks when creating the listening socket. Refactored the Socket and
+  <code>CIOBuffer
+</code> classes so that common list management code is now in <code>CNodeList
+</code> and common user data code is now in
+  <code>COpaqueUserData</code>.</li>
+<li>29th May 2002 - Linting and general code cleaning</li>
+<li>18th June 2002 - Removed call to <code>ReuseAddress</code>() during the creation of the listening socket as it not required - Thanks to Alun Jones for pointing this out to me.</li>
+<li>28th June 2002 - Adjusted how we handle socket closure.</li>
+<li>30th June 2002 - Removed the requirement for users to subclass the socket server's worker thread class. All of the work can now be done by simply subclassing the socket server class.</li>
+<li>15th July 2002 - Socket closure notifications now occur when the server shuts down whilst there are active connections.
+  <code>SocketServer
+</code> can now be set to ensure read and write packet sequences.</li>
+<li>23 July 2002 - Bug fix to <code>CSocketServer::ProcessDataStream()</code>. We were
+  reusing the buffer when we 
+shouldn't have been. Code was fine up until the changes on 30th June and is fine again now. Thanks to an anonymous CodeProject reader for pointing this out to me. 
+</li><li>12th August 2002 - Removed the race condition in socket closure - Thanks to David McConnell for pointing this out.
+Derived class can receive connection reset and connection error notifications. Socket provides a means to determine if
+send/receive are connected. Dispatch to the thread pool now uses shared enums rather than hard coded constant values.
+General code cleaning and lint issues.</li>
+</ul>
+<h2>Other articles in the series</h2>
+<ol>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer1.asp">
+A reusable socket server class</a></li>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer2.asp">
+<i>Business logic processing in a socket server</i></a></li>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer3.asp">
+Speeding up socket server connections with AcceptEx</a></li>
+<li> <a href="http://www.codeproject.com/internet/ReusableSocketServer4.asp">
+Handling multiple pending socket read and write operations</a></li>
+<li> <a href="http://www.codeproject.com/csharp/TestingSocketServers.asp">
+Testing socket servers with C# and .Net</a></li>
+<li> <a href="http://www.codeproject.com/internet/COMSocketServer.asp">
+A high performance TCP/IP socket server COM component for VB</a></li>
+</ol>
+
+
+						</div>
+						
+
+						<div class="float-right" style="margin:20px 0 0 10px;border:1px solid #ccc">
+						
+						</div>
+                        
+                        
+						
+						<h2>License</h2>
+						<div id="LicenseTerms"><p>This article, along with any associated source code and files, is licensed under <a href="http://www.codeproject.com/info/cpol10.aspx" rel="license">The Code Project Open License (CPOL)</a></p></div>
+						
+
+                        
+						<h2>Share</h2>
+				        <div class="share-list">
+					        
+				        </div> 
+    			        
+
+
+						
+						<h2 id="ctl00_AboutHeading">About the Author</h2>
+						    
+
+
+<div class="author-wrapper">
+
+    <div class="pic-wrapper"> 
+        <img id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberPhoto" class="profile-pic" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/member_unknown.gif" style="border-width:0px;transform:rotate(-3deg);">
+
+    </div>
+
+    <div class="container-member">  
+        <b><a id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberProfileLink" class="author" href="http://www.codeproject.com/Members/Len-Holgate">Len Holgate</a></b>
+
+        <table class="extended">
+        <tbody><tr>
+            <td rowspan="2" nowrap="" valign="middle">
+            
+            </td>
+            <td width="100%">
+                <div class="company">
+                    <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberJobTitle">Software Developer (Senior)</span>
+	                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberCompany">JetByte Limited</span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberLocation">United Kingdom <img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/GB.gif" alt="United Kingdom" width="16px" height="11px"></span>
+            </td>
+        </tr>
+        </tbody></table>
+    </div>
+
+    <div class="description">
+        Len has been programming for over 30 years, having first started with a <a rel="nofollow" href="http://www.apj.co.uk/zx80/zx80_main_h.htm">Sinclair ZX-80</a>. Now he runs his own consulting company, <a rel="nofollow" href="http://www.jetbyte.com/">JetByte Limited</a> and has a technical blog <a rel="nofollow" href="http://www.lenholgate.com/">here</a>.<br>
+<br>
+JetByte provides contract programming and consultancy services. We can provide experience in COM, Corba, C++, Windows NT and UNIX. Our speciality is the design and implementation of systems but we are happy to work with you throughout the entire project life-cycle. We are happy to quote for fixed price work, or, if required, can work for an hourly rate. <br>
+<br>
+We are based in London, England, but, thanks to the Internet, we can work 'virtually' anywhere...<br>
+<br>
+Please note that many of the articles here may have updated code available on Len's <a rel="nofollow" href="http://www.lenholgate.com/">blog</a> and that the IOCP socket server framework is also available in a licensed, much improved and fully supported version, see <a rel="nofollow" href="http://www.serverframework.com/">here</a> for details.
+
+        
+    </div>
+
+</div><br>
+						
+						
+
+						<div class="clearfix"></div>
+
+						<div style="padding-top:8px">
+							
+						</div>
+
+					
+
+				    
+					</form>
+
+				</div>
+
+				
+				<div class="bottom-promo"> 
+				    
+				</div>
+				
+
+                
+        <h2 id="ctl00_AlsoRead_RelatedResults_ctl00_Header" class="also-read">You may also be interested in...</h2>
+        <table class="spaced content-list also-read">
+    
+	    <tbody><tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Thumbnail" href="http://www.codeproject.com/Articles/1086361/Java-for-Bluetooth-LE-applications"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Link" href="http://www.codeproject.com/Articles/1086361/Java-for-Bluetooth-LE-applications">Java for Bluetooth LE applications </a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Thumbnail" href="http://www.codeproject.com/Articles/1085650/Hack-Grunt-to-Make-Your-Website-Awesome"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Link" href="http://www.codeproject.com/Articles/1085650/Hack-Grunt-to-Make-Your-Website-Awesome">Hack Grunt to Make Your Website Awesome</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Thumbnail" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/Thumb-1086365.jpg" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Link" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT">The Past, Present, and Future of IoT</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Thumbnail" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Link" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers">The Microsoft Cloud Platform for Developers</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Thumbnail" href="http://www.codeproject.com/Articles/1082383/Make-your-website-mobile-friendly-using-Bootstrap"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Link" href="http://www.codeproject.com/Articles/1082383/Make-your-website-mobile-friendly-using-Bootstrap">Make your website mobile friendly using Bootstrap</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Thumbnail" href="http://www.codeproject.com/Articles/1085643/Looking-Ahead-to-Csharp-with-Mads-Torgersen"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Link" href="http://www.codeproject.com/Articles/1085643/Looking-Ahead-to-Csharp-with-Mads-Torgersen">Looking Ahead to C# 7 with Mads Torgersen</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+		</tbody></table>
+	
+
+
+
+				
+				
+
+					<h2>Comments and Discussions</h2>
+					
+					<p><img alt="Comment" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/NewComment.gif" width="12px" height="16px">
+					<b>337 messages</b> have been posted for this article 
+					Visit <b><a id="ctl00_ArticleLink" href="http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class">http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class</a></b> to post and view comments on 
+					this article, or click <b><a id="ctl00_PrintWithMessage" href="http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class?display=PrintAll">here</a></b> 
+					to get a print view with messages.</p>
+					
+				
+
+			</div>
+			
+		</td>
+		<td width="170px" class="article-wing-right">
+			
+		</td>
+		</tr></tbody></table>
+
+		
+		<div class="theme1-background" style="height:2px" id="stickyStop"></div>
+
+		<div class="extended tiny-text">
+			<div class="row">
+				<div class="float-left">
+					<a id="ctl00_PermaLink" itemprop="url" href="http://www.codeproject.com/Articles/2337/A-reusable-high-performance-socket-server-class">Permalink</a> | 
+					<a id="ctl00_AdvertiseLink" href="http://developermedia.com/">Advertise </a> |
+					<a id="ctl00_PrivacyLink" href="http://www.codeproject.com/info/privacy.aspx">Privacy</a> |
+                    <a id="ctl00_TermsOfUseLink" href="http://www.codeproject.com/info/TermsOfUse.aspx">Terms of Use</a> |
+					<a id="ctl00_Mobile">Mobile</a>
+					<br>
+								
+					
+					Web01 |
+					2.8.160311.1 |
+					Last Updated 18 Aug 2002								
+				</div>
+
+                <div id="ctl00_GoogleTranslate" class="translate float-left"><div class="skiptranslate goog-te-gadget" dir="ltr"><div id=":0.targetLanguage" class="goog-te-gadget-simple" style="white-space: nowrap;"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/cleardot.gif" class="goog-te-gadget-icon" style="background-image: url(&quot;https://translate.googleapis.com/translate_static/img/te_ctrl3.gif&quot;); background-position: -65px 0px;"><span style="vertical-align: middle;"><a class="goog-te-menu-value" href="javascript:void(0)"><span>选择语言</span><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/cleardot.gif" width="1" height="1"><span style="border-left-width: 1px; border-left-style: solid; border-left-color: rgb(187, 187, 187);">​</span><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/cleardot.gif" width="1" height="1"><span style="color: rgb(155, 155, 155);">▼</span></a></span></div></div></div>      
+
+				<div class="float-right align-right">
+					Article Copyright 2002 by Len Holgate<br>Everything else
+					Copyright © <a href="mailto:webmaster@codeproject.com">CodeProject</a>, 1999-2016 <br>
+				</div>
+
+				
+
+			</div>
+		</div>
+		
+
+		<br clear="all">
+		
+			
+
+	</div> 
+	</div>
+</div>
+
+
+
+
+
+
+<script type="text/javascript" language="Javascript" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/jquery.min.js"></script><script type="text/javascript">//<![CDATA[
+if (typeof jQuery == 'undefined') {
+    document.write(unescape("%3Cscript src='/script/JS/jquery-1.6.2.min.js' type='text/javascript' %3E%3C/script%3E"));
+}//]]></script>
+<script type="text/javascript" language="Javascript" src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/element.js"></script>
+<script type="text/javascript" language="Javascript">//<![CDATA[
+$(document).ready(function () { processCodeBlocks.Initialise('#contentdiv'); });
+function googleTranslateElementInit() {  new google.translate.TranslateElement({   pageLanguage: 'en',   layout: google.translate.TranslateElement.InlineLayout.SIMPLE,   autoDisplay: false,   gaTrack: true,   gaId: 'UA-1735123-1'},  'ctl00_GoogleTranslate');}
+$(document).ready(function() { anchorAnimate();
+});
+
+//]]>
+</script><div id="goog-gt-tt" class="skiptranslate" dir="ltr"><div style="padding: 8px;"><div><div class="logo"><img src="./A reusable, high performance, socket server class - Part 2 - CodeProject_files/translate_24dp.png" width="20" height="20"></div></div></div><div class="top" style="padding: 8px; float: left; width: 100%;"><h1 class="title gray">原文</h1></div><div class="middle" style="padding: 8px;"><div class="original-text"></div></div><div class="bottom" style="padding: 8px;"><div class="activity-links"><span class="activity-link">提供更好的翻译建议</span><span class="activity-link"></span></div><div class="started-activity-container"><hr style="color: #CCC; background-color: #CCC; height: 1px; border: none;"><div class="activity-root"></div></div></div><div class="status-message" style="display: none;"></div></div>
+
+
+
+<iframe frameborder="0" class="goog-te-menu-frame skiptranslate" style="visibility: visible; box-sizing: content-box; width: 937px; height: 263px; display: none;"></iframe></body></html>

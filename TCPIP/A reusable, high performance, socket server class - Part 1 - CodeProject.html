@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<!-- saved from url=(0105)http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa?display=Print -->
+<html style="height: 100%;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>A reusable, high performance, socket server class - Part 1 - CodeProject</title> 
+	<link type="text/css" rel="stylesheet" href="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/Main.min.css">
+
+	
+
+<meta name="Description" content="Writing a high performance server that runs on Windows NT and uses sockets to communicate with the outside world isn&#39;t that hard once you dig through the API references. What&#39;s more most of the code is common between all of the servers that you&#39;re likely to want to write.; Author: Len Holgate; Updated: 18 Aug 2002; Section: Internet / Network; Chapter: General Programming; Updated: 18 Aug 2002">
+<meta name="Keywords" content="VC6, VC7, Win2K, WinXP, C++, Windows, Visual-Studio, MFC, Dev, Intermediate,Internet / Network,General Programming,Free source code, tutorials">
+<meta name="Author" content="Len Holgate">
+<meta name="Rating" content="General">
+<meta name="Revisit-After" content="1 days">
+<meta name="application-name" content="CodeProject">
+<meta name="google-translate-customization" content="d908bb7ce7aff658-4c2f3a504525c916-g629383f736781a8a-13">
+
+<link rel="dns-prefetch" href="http://ajax.googleapis.com/"> 
+
+
+
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - All Topics" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=1">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Android" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=22">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - iOS" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=25">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C++" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=2">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C#" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=3">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Web" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=23">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Lounge Postings" href="http://www.codeproject.com/webservices/LoungeRSS.aspx">
+<meta name="robots" content="index, follow">
+<link rel="search" type="application/opensearchdescription+xml" title="CodeProject" href="http://www.codeproject.com/info/OpenSearch.xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!--<base target="_top">--><base href="." target="_top">
+	<link rel="icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="shortcut icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="apple-touch-icon" href="http://www.codeproject.com/images/FavIcon-Apple.png" type="image/png">
+<script type="text/javascript" language="Javascript">//<![CDATA[
+function defrm () { /* thanks twitter */ document.write = ''; window.top.location = window.self.location;  setTimeout(function() { document.body.innerHTML = ''; }, 0);  window.self.onload = function(evt) { document.body.innerHTML = ''; }; }if (window.top !== window.self) {  try {  if (window.top.location.host) { /* will throw */ } else { defrm(); /* chrome */ }  } catch (ex) { defrm(); /* everyone else */ } }if (typeof(DemoUrl)!='undefined')   document.write(unescape('%3Cme')+'ta http'+'-equiv="re'+'fresh"                  con'+'tent="1;url='+DemoUrl+unescape('"%3CE'));
+
+//]]>
+</script>
+
+	
+
+
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-1735123-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_setDomainName', 'www.codeproject.com']);
+	_gaq.push(['_setSessionTimeout', '1200']); 
+
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+	})(); 
+</script><script type="text/javascript" async="" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/ga.js"></script>
+
+
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/translateelement.css"><script type="text/javascript" charset="UTF-8" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/main_zh-CN.js"></script><script type="text/javascript" charset="UTF-8" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/element_main.js"></script></head>	
+
+<body class="chrome chrome47 touch" style="position: relative; min-height: 100%; top: 0px;">
+
+<a class="access-link" href="http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa?display=Print#Main"><img alt="Click here to Skip to main content" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/t.gif"></a>
+
+
+
+
+
+<div class="page-background">
+
+	
+	
+
+	
+
+	
+    <div id="ctl00_STM" class="site-top-menu fluid">
+        <div class="main-content">
+            
+        </div>
+    </div>
+
+	
+    <div id="ctl00_SH" class="site-header fluid">
+        <div class="main-content">
+            <div class="logo"><a href="http://www.codeproject.com/"><img id="ctl00_Logo" tabindex="1" title="CodeProject" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/logo250x135.gif" alt="Home" style="height:135px;width:250px;border-width:0px;"></a></div>
+            <div class="promo"></div>
+        </div>
+    </div>
+
+	<a href="http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa?display=Print#Main"><img alt="Click here to Skip to main content" class="access-link" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/t.gif"></a>
+
+	
+			
+	
+
+	<div id="A" class="container-content-wrap fluid print"> 
+
+	<div itemscope="" itemtype="http://schema.org/Article" class="container-content"> 
+
+
+		<div class="clearfix">
+			<div class="container-breadcrumb float-left ">
+				<div><a href="http://www.codeproject.com/script/Content/SiteMap.aspx">Articles</a> » <a href="http://www.codeproject.com/Chapters/6/General-Programming.aspx">General Programming</a> » <a href="http://www.codeproject.com/KB/IP/"><span itemprop="articleSection">Internet / Network</span></a> » <a href="http://www.codeproject.com/KB/IP/#Beginners">Beginners</a></div>
+			</div>
+
+			<div class="float-left">
+				
+			</div>
+
+			<div class="edit-links float-right">
+				
+			</div>
+
+			<div class="article-nav float-right">
+					
+		        
+		        
+					
+
+                
+				
+			</div>
+		</div>
+
+		<table class="extended container-article-parts" cellpadding="0" cellspacing="0">
+        <tbody><tr valign="top">
+		<td width="117px" class="article-wing-left">
+
+			
+
+		</td>
+		<td>
+			
+			<div id="AT" class="container-article  fluid tight"> 
+
+				<div class="article">
+
+					<form name="aspnetForm" method="post" action="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/A reusable, high performance, socket server class - Part 1 - CodeProject.html" id="aspnetForm" style="margin:0;padding:0">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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">
+</div>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="10C1FD69">
+</div>
+
+					
+					 
+					<div class="header">
+					    <a name="Main"></a>
+
+					    
+					    <a name="_articleTop" id="_articleTop"></a>
+					    <div class="title">
+					        
+					        <h1 id="ctl00_ArticleTitle" itemprop="name">A reusable, high performance, socket server class - Part 1</h1> 
+					    </div>
+
+                        <div style="height:34px">
+					        
+					        <div class="entry float-left">
+                                
+                                <div class="float-left">
+
+						            <span class="author"><a href="http://www.codeproject.com/script/Membership/View.aspx?mid=133" rel="author"><span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><span itemprop="name">Len Holgate</span></span></a></span>, 
+						            <span class="date" itemprop="dateModified" title="Date last updated" content="2002-08-18 00:00:00">
+							            18 Aug 2002</span>
+			
+                                    <a id="ctl00_LicenseLink" title="The Code Project Open License (CPOL)" class="license" href="http://www.codeproject.com/info/cpol10.aspx">CPOL</a><div id="ctl00_CurRat" class="tooltip anchorLink" style="cursor:pointer;margin-top: 5px">
+				
+							            
+
+<table cellpadding="0" cellspacing="0" class="small-text" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating"> 
+<tbody><tr>
+	
+	<td class="nowrap">
+
+		
+			<meta itemprop="bestRating" content="5"> 
+			<meta itemprop="worstRating" content="1">
+		
+
+		<span id="ctl00_ArticleRating_VI">
+		<div class="nowrap rating-stars-medium" style="height:18px;width:80px;position:relative;">
+	<div class="clipped align-left float-left" style="height:16px;width:77px;">
+		<img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/stars-fill-md.png" style="border-width:0px;">
+	</div><div class="clipped" style="height:16px;width:3px;position:relative;">
+		<img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/stars-empty-md.png" style="border-width:0px;position:absolute;top:0;right:0;">
+	</div>
+</div>
+		</span>
+
+		
+	</td>
+	
+	<td id="ctl00_ArticleRating_VR" class="nowrap">
+		&nbsp;
+		<span id="ctl00_ArticleRating_VotesR">&nbsp;<span itemprop="ratingValue" class="rating">4.86</span> (<span itemprop="ratingCount" class="count">73</span> votes)</span>
+		
+	</td>
+
+</tr>
+
+</tbody></table>
+
+
+							            <div id="ctl00_RB" class="speech-bubble-container-up">
+								            <div class="speech-bubble-up" style="width:150px !important">
+									                        
+<div>
+<table class="feature" width="100%" height="20px" title="Voting Distribution. Recent data only" cellpadding="0" cellspacing="0"><tbody><tr class="chart-row"><td class="chart-column"><div class="rating-ignore-vote" title="Votes not included in score."><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="2 votes, 5.1%" title="2 votes, 5.1%"></div><span title="0 votes">1</span></td>
+<td class="chart-column"><div class="rating-ignore-vote" title="Votes not included in score."><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="1 vote, 2.6%" title="1 vote, 2.6%"></div><span title="0 votes">2</span></td>
+<td class="chart-column"><span title="0 votes">3</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/pollcol.gif" width="20pxpx" height="2px" border="0px" alt="4 votes, 10.3%" title="4 votes, 10.3%"></div><span title="4 votes">4</span></td>
+<td class="chart-column"><div><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/pollcol.gif" width="20pxpx" height="20px" border="0px" alt="35 votes, 89.7%" title="35 votes, 89.7%"></div><span title="35 votes">5</span></td>
+</tr></tbody></table><div class="small-text align-center">4.86/5 - 73 votes</div><div class="small-text align-center subdue">3 removed</div><div class="small-text align-center subdue">μ 4.49, σ<sub>a</sub> 1.71 [<a href="http://www.codeproject.com/KB/FAQs/RatingReputationFAQ.aspx#noisefilter">?</a>]</div>
+</div>
+								            </div>
+								            <div class="speech-bubble-pointer-up">
+									            <div class="speech-bubble-pointer-up-inner"></div>
+								            </div>
+							            </div>
+						            </div>
+                                </div>
+					        </div>
+
+                            
+						    
+						    	
+                        </div>
+
+   					    
+                        <div id="ctl00_description" class="summary" itemprop="headline">Writing a high performance server that runs on Windows NT and uses sockets to communicate with the outside world isn't that hard once you dig through the API references. What's more most of the code is common between all of the servers that you're likely to want to write.</div><span id="ctl00_thumbnailUrl" class="date" itemprop="image" content="https://codeproject.global.ssl.fastly.net/script/Articles/Images/article100x80.png"></span>			
+
+                    </div>
+                    
+					
+					
+
+					
+
+					
+					
+					
+
+						
+					
+
+					
+
+						
+						<div id="contentdiv" class="text" itemprop="articleBody">
+						
+
+
+
+<p>The following source was built using Visual Studio 6.0 SP5 and Visual Studio .NET. You need to have
+a version of the <a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">Microsoft Platform 
+SDK</a> installed</p>
+<p>Note that the debug builds of the code waste a lot of CPU cycles due to the the debug trace output. 
+It's only worth profiling the release builds.</p>
+<ul class="download">
+<li><a href="http://www.codeproject.com/KB/IP/JBSocketServer1/JBSocketServer1.zip">JBSocketServer1.zip - yet another echo server - 68 Kb </a></li>
+<li><a href="http://www.codeproject.com/KB/IP/JBSocketServer1/JBSocketServer2.zip">JBSocketServer2.zip - a packet based echo server - 70 Kb </a></li>
+<li><a href="http://www.codeproject.com/KB/IP/JBSocketServer1/JBSocketServer3.zip">JBSocketServer3.zip - a dummy POP3 server - 70 Kb </a></li>
+<li><a href="http://www.codeproject.com/KB/IP/JBSocketServer1/JBServerShutdown.zip">JBServerShutdown.zip - an off switch for the servers - 42 Kb </a></li>
+</ul>
+
+<h2>Overview</h2>
+<p>Writing a high performance server that runs on Windows NT and uses sockets to communicate with the 
+outside world isn't that hard once you dig through the API references. What's more most of the code is 
+common between all of the servers that you're likely to want to write. It should be possible to wrap 
+all of the common code up in some easy to reuse classes. However, when I went looking for some classes 
+to use to write my first socket server all of the examples and articles that I found required the user 
+to pretty much start from scratch or utilise "cut and paste reuse" when they wanted to use the code 
+in their own servers. Also the more complicated examples, ones that used IO completion ports for example, 
+tended to stop short of demonstrating real world usage. After all, anyone can write an echo server...
+The aim of this article is to explain the set of reusable classes that I designed for writing socket 
+servers and show how they can be used with servers which do more than simply echo every byte they 
+receive. Note that I'm not going to bother explaining the hows and why's of IO completion ports etc, 
+there are plenty of references available.</p>
+<h2>What does a socket server need to do?</h2>
+<p>A socket server needs to be able to listen on a specific port, accept connections and read and write
+data from the socket. A high performance and scaleable socket server should use asynchronous socket IO 
+and IO completion ports. Since we're using IO completion ports we need to maintain a pool of threads to 
+service the IO completion packets. If we were to confine ourselves to running on Win2k and above we could 
+use the <code>QueueUserWorkItem</code> api to deal with our threading requirements but to enable us to run on the
+widest selection of operating systems we have to do the work ourselves.</p>
+<p>Before we can start accepting connections we need to have a socket to listen on. Since there are many
+different ways to set such a socket up, we'll allow the user's derived class to create this socket by 
+providing a virtual function as follows:</p>
+<pre><span class="code-keyword">virtual</span> SOCKET CreateListeningSocket(
+   <span class="code-keyword">unsigned</span> <span class="code-keyword">long</span> address,
+   <span class="code-keyword">unsigned</span> <span class="code-keyword">short</span> port);
+</pre>
+<p>The server class provides a default implementation that's adequate in most circumstances. It looks
+something like this:</p>
+<pre>SOCKET CSocketServer::CreateListeningSocket(
+   unsigned <span class="code-keyword">long</span> address,
+   unsigned <span class="code-keyword">short</span> port)
+{
+   SOCKET s = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP, NULL, <span class="code-digit">0</span>,
+                          WSA_FLAG_OVERLAPPED);
+
+   <span class="code-keyword">if</span> (s == INVALID_SOCKET)
+   {
+      <span class="code-keyword">throw</span> CWin32Exception(_T(<span class="code-string">"</span><span class="code-string">CSocketServer::CreateListeningSocket()"</span>),
+                            ::WSAGetLastError());
+   }
+
+   CSocket listeningSocket(s);
+
+   CSocket::InternetAddress localAddress(address, port);
+
+   listeningSocket.Bind(localAddress);
+
+   listeningSocket.Listen(<span class="code-digit">5</span>);
+
+   <span class="code-keyword">return</span> listeningSocket.Detatch();
+}
+</pre>
+<p>Note that we use a helper class, <code>CSocket</code>, to handle setting up our listening socket. This class
+acts as a "smart pointer" for sockets, automatically closing the socket to release resources when it 
+goes out of scope and also wraps the standard socket API calls with member functions that throw
+exceptions on failure.</p>
+<p>Now that we have a socket to listen on we can expect to start receiving connections. We'll use
+the <code>WSAAccept()</code> function to accept our connections as this is easier to use than the higher 
+performance <code>AcceptEx()</code> we'll then compare the performance characteristics with 
+<code>AcceptEx()</code> in <a href="http://www.codetools.com/internet/JBSocketServer2.asp">a later article</a>.</p>
+<p>When a connection occurs we create a <code>Socket</code> object to wrap the <code>SOCKET</code> handle. 
+We associate this object with our IO completion port so that IO completion packets will be generated for 
+our asynchronous IO. We then let the derived class know that a connection has occurred by calling the 
+<code>OnConnectionEstablished()</code> virtual function. The derived class can then do whatever it wants with the 
+connection, but the most common thing would be to issue a read request on the socket after perhaps 
+writing a welcome message to the client.</p>
+<pre><span class="code-keyword">void</span> CSocketServer::OnConnectionEstablished(
+   Socket *pSocket,
+   CIOBuffer *pAddress)
+{
+   <span class="code-keyword">const</span> std::string welcomeMessage(<span class="code-string">"</span><span class="code-string">+OK POP3 server ready\r\n"</span>);
+
+   pSocket-&gt;Write(welcomeMessage.c_str(), welcomeMessage.length());
+
+   pSocket-&gt;Read();
+}
+</pre>
+<h2>Asynchronous IO</h2>
+<p>Since all of our IO operations are operating asynchronously they return immediately to the calling code.
+The actual implementation of these operations is made slightly more complex by the fact that any outstanding
+IO requests are terminated when the thread that issued those requests exits. Since we wish to ensure that
+our IO requests are not terminated inappropriately we marshal these calls into our socket server's IO
+thread pool rather than issuing them from the calling thread. This is done by posting an IO completion
+packet to the socket server's IO Completion Port. The server's worker threads know how to handle
+4 kinds of operation: Read requests, read completions, write requests and write completions. The request
+operations are generated by calls to <code>PostQueuedCompletionStatus</code> and the completions are generated 
+when calls to <code>WSARecv</code> and <code>WSASend</code> complete asynchronously.</p>
+<p>To be able to read and write data we need somewhere to put it, so we need some kind of memory buffer. 
+To reduce memory allocations we could pool these buffers so that we don't delete them once they're done 
+with but instead maintain them in a list for reused. Our data buffers are managed by an allocator which 
+is configured by passing arguments to the constructor of our socket server. This allows the user to set
+the size of the IO buffers used as well as being able to control how many buffers are retained in the
+list for reuse. The <code>CIOBuffer</code> class serves as our data buffer follows the standard IO 
+Completion Port pattern of being an extended "overlapped" structure.</p>
+<p>As all good references on IO Completion Ports tell you, calling <code>GetQueuedCompletionStatus</code> blocks 
+your thread until a completion packet is available and, when it is, returns you a completion key, 
+the number of bytes transferred and an "overlapped" structure. The completion key represents 'per device'
+data and the overlapped structure represents 'per call' data. In our server we use the completion key
+to pass our <code>Socket</code> class around and the overlapped structure to pass our data buffer. Both our 
+<code>Socket</code> class and our data buffer class allow the user to associate 'user data' with them. This 
+is in the form of a single unsigned long value (which could always be used to store a pointer to a larger structure).</p>
+<p>The socket server's worker threads loop continuously, blocking on their completion port until work
+is available and then extracting the <code>Socket</code> and <code>CIOBuffer</code> from the completion 
+data and processing the IO request. The loop looks something like this:</p>
+<pre><span class="code-keyword">int</span> CSocketServer::WorkerThread::Run()
+{
+   <span class="code-keyword">while</span> (<span class="code-keyword">true</span>)
+   {
+      DWORD dwIoSize = <span class="code-digit">0</span>;
+      Socket *pSocket = <span class="code-digit">0</span>;
+      OVERLAPPED *pOverlapped = <span class="code-digit">0</span>;
+
+      m_iocp.GetStatus((PDWORD_PTR)&amp;pSocket, &amp;dwIoSize, &amp;pOverlapped);
+
+      CIOBuffer *pBuffer = CIOBuffer::FromOverlapped(pOverlapped);
+
+      <span class="code-keyword">switch</span> pBuffer-&gt;GetUserData()
+      {
+         <span class="code-keyword">case</span> IO_Read_Request :
+            Read(pSocket, pBuffer);
+         <span class="code-keyword">break</span>;
+
+         <span class="code-keyword">case</span> IO_Read_Completed :
+            ReadCompleted(pSocket, pBuffer);
+         <span class="code-keyword">break</span>;
+
+         <span class="code-keyword">case</span> IO_Write_Request :
+            Write(pSocket, pBuffer);
+         <span class="code-keyword">break</span>;
+
+         <span class="code-keyword">case</span> IO_Write_Completed :
+            WriteCompleted(pSocket, pBuffer);
+         <span class="code-keyword">break</span>;
+      }
+   }
+}
+</pre>
+<p>Read and write requests cause a read or write to be performed on the socket. Note that the actual
+read/write is being performed by our IO threads so that they cannot be terminated early due to the
+thread exiting. The <code>ReadCompleted()</code> and <code>WriteCompleted()</code> methods are called 
+when the read or write actually completes. The worker thread marshals these calls into the socket 
+server class and the socket server provides two virtual functions to allow the caller's derived class 
+to handle the situations. Most of the time the user will not be interested in the write completion, 
+but the derived class is the only place that read completion can be handled.</p>
+<pre><span class="code-keyword">virtual</span> <span class="code-keyword">void</span> ReadCompleted(
+   Socket *pSocket,
+   CIOBuffer *pBuffer) = <span class="code-digit">0</span>;
+
+<span class="code-keyword">virtual</span> <span class="code-keyword">void</span> WriteCompleted(
+   Socket *pSocket,
+   CIOBuffer *pBuffer);
+</pre>
+<p>Our client can provide their own worker thread if they wish, it should derive from the socket server's 
+worker thread. If the client decides to do this then we need to have a way for the server to be configured 
+to use this derived worker thread rather than the default one. Whenever the server creates a worker thread 
+(and this only occurs when the server first starts as the threads run for the life time of the server) it 
+calls the following virtual function:</p>
+<pre><span class="code-keyword">virtual</span> WorkerThread *CreateWorkerThread(
+   CIOCompletionPort &amp;iocp);
+</pre>
+<p>If we want to provide our own implementation of the worker thread then we should override this function 
+and create our thread object and return it to the caller.</p>
+<h2>Graceful shutdown</h2>
+<p>The send and receive sides of a socket can be closed independently. When a client closes the send side of 
+its connection to a server any reads pending on the socket on the server will return with a value of 0. The 
+derived class can opt to receive a notification when the client closes the send side of its connection by 
+overriding the following virtual function.</p>
+<pre><span class="code-keyword">virtual</span> <span class="code-keyword">void</span> OnConnectionClientClose(
+   Socket *pSocket);
+</pre>
+<p>The server will only receive this notification once even if it had multiple reads outstanding on the socket 
+when the client closed it. The server will not receive 0 length read completions. The closure of the client's 
+send side of the socket, the server's receive side, does not prevent the server from sending more data to the 
+client it simply means that the client has no more data to send to the server.</p>
+<p>The server can shutdown the connection using the <code>Shutdown()</code> method on the <code>Socket</code> 
+class. Like the underlying <code>WinSock2</code> function, shutdown takes a value that indicates which parts 
+of the connection should be shutdown. If the server has finished sending data then it can call 
+<code>Shutdown()</code> with <code>SD_SEND</code> to terminate the send side of the connection, 
+<code>SD_RECEIVE</code> to terminate the receive side, or with <code>SD_BOTH</code> to terminate both sides. 
+Shutting down the send side of the server's connection will only actually occur once all outstanding writes have completed. This allows the server developer to write code such as that shown below without having to worry about there being a race condition between the write being processed by the IO thread and the shutdown occurring.</p> 
+<pre>pSocket-&gt;Write(pBuffer);
+pSocket-&gt;Shutdown(SD_SEND);
+</pre>
+<h2>Socket closure</h2>
+<p>The socket is closed when there are no outstanding reads or writes on the socket and no references to the socket
+are held. At this point the derived class is notified by a call to the <code>OnConnectionClosing()</code> virtual function.</p>
+<pre><span class="code-keyword">virtual</span> <span class="code-keyword">bool</span> OnConnectionClosing(
+   Socket *pSocket);
+</pre>
+<p>The server's default implementation of this simply returns false which means that derived class doesn't want to
+be responsible for closing the socket. The socket server class then closes the socket after first turning off the
+linger option. This causes an abortive shutdown and sent data may be lost if it hasn't all been sent when the close 
+occurs. The derived class may elect to handle socket closure itself and, if so, should override <code>OnConnectionClosing()</code> and return true to indicate that it has handled the closure. Before returning 
+the socket should either have been explicitly closed by the derived class or <code>AddRef()</code> should be 
+called and a reference held so that the socket can be closed later. The derived class will only get one chance to intervene in the closure of the socket, if it fails to close the socket then the socket will be abortively closed without further notifications when the final reference to the socket is released.</p>
+<pre><span class="code-keyword">bool</span> CSocketServer::OnConnectionClosing(
+   Socket *pSocket)
+{
+   <span class="code-comment">//</span><span class="code-comment"> we'll handle socket closure so that we can do a lingering close
+</span>   <span class="code-comment">//</span><span class="code-comment"> note that this is not ideal as this code is executed on the an
+</span>   <span class="code-comment">//</span><span class="code-comment"> IO thread. If we had a thread pool we could fire this off to the
+</span>   <span class="code-comment">//</span><span class="code-comment"> thread pool to handle.
+</span>
+   pSocket-&gt;Close();
+
+   <span class="code-keyword">return</span> <span class="code-keyword">true</span>;
+}
+</pre>
+<p>Note that <code>OnConnectionClosing()</code> is only called if the connection isn't explicitly closed by 
+the server. If the server wishes to explicitly close the connection then it can do so by simply calling the 
+<code>Close()</code> or <code>AbortiveClose()</code> methods of the <code>Socket</code> class.</p>
+<h2>A simple server</h2>
+<p>We now have a framework for creating servers. The user simply needs to provide a class that is derived from
+<code>CSocketServer</code> and handles the <code>OnConnectionEstablished()</code> and <code>ReadCompleted()</code>
+situations. The class could look something like this:</p>
+<pre><span class="code-keyword">class</span> CMySocketServer : CSocketServer
+{
+   <span class="code-keyword">public</span> :
+
+      CMySocketServer (
+         unsigned <span class="code-keyword">long</span> addressToListenOn,
+         unsigned <span class="code-keyword">short</span> portToListenOn);
+
+   <span class="code-keyword">private</span> :
+
+      <span class="code-keyword">virtual</span> <span class="code-keyword">void</span> OnConnectionEstablished(
+         Socket *pSocket,
+         CIOBuffer *pAddress);
+
+      <span class="code-keyword">virtual</span> <span class="code-keyword">bool</span> OnConnectionClosing(
+         Socket *pSocket);
+
+      <span class="code-keyword">virtual</span> <span class="code-keyword">void</span> ReadCompleted(
+         Socket *pSocket,
+         CIOBuffer *pBuffer);
+};</pre>
+<p>Implementations for <code>OnConnectionEstablished()</code> and <code>OnConnectionClosing()</code> 
+have already been presented above. Which leaves us with the implementation of our socket server's 
+<code>ReadCompleted()</code> method. This is where the server handles incoming data and, in the case 
+of a simple Echo server <img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/smiley_wink.gif" align="top" alt="Wink | ;)">  it could be as simple as this:</p>
+<pre><span class="code-keyword">void</span> CMySocketServer::ReadCompleted(
+   Socket *pSocket,
+   CIOBuffer *pBuffer)
+{
+   pSocket-&gt;Write(pBuffer);
+}
+</pre>
+<h2>YAES - Yet another echo server</h2>
+<p>A complete echo server is available for download 
+<a href="http://www.codetools.com/internet/JBSocketServer1/JBSocketServer1.zip">here</a> in 
+JBSocketServer1.zip. The server simply echoes the incoming byte stream back to the client. In addition to 
+implementing the methods discussed above the socket server derived class also implements several 
+'notification' methods that the server calls to inform the derived class of various internal goings on. 
+The echo server simply outputs a message to the screen (and log file) when these notifications occur 
+but the idea behind them is that the derived class can use them to report on internal server state 
+via performance counters or suchlike.</p>
+<p>You can test the echo server by using telnet. Simply telnet to localhost on port 5001 (the port that 
+the sample uses by default) and type stuff and watch it get typed back at you. The server runs until a 
+named event is set and then shuts down. The very simple Server Shutdown program, available 
+<a href="http://www.codetools.com/internet/JBSocketServer1/JBServerShutdown.zip">here</a>, provides an 
+off switch for the server.</p>
+<h2>A slightly more real world example</h2>
+<p>Servers that do nothing but echo a byte stream are rare, except as poor examples. Normally a server 
+will be expecting a message of some kind, the exact format of the message is protocol specific but two 
+common formats are a binary message with some form of message length indicator in a header and an ASCII
+text message with a predefined set of 'commands' and a fixed command terminator, often "\r\n". As soon 
+as you start to work with real data you are exposed to a real-world problem that is simply not an
+issue for echo servers. Real servers need to be able to break the input byte stream provided by the 
+TCP/IP socket interface into distinct commands. The results of issuing a single read on a socket 
+could be any number of bytes up to the size of the buffer that you supplied. You may get a single, 
+distinct, message or you may only get half of a message, or 3 messages, you just can't tell. Too often 
+inexperienced socket developers assume that they'll always get a complete, distinct, message and often 
+their testing methods ensure that this is the case during development.</p>
+<h2>Chunking the byte stream</h2>
+<p>One of the simplest protocols that a server could implement is a packet based protocol where the 
+first X bytes are a header and the header contains details of the length of the complete
+packet. The server can read the header, work out how much more data is required and keep reading until
+it has a complete packet. At this point it can pass the packet to the business logic that knows how to
+process it. The code to handle this kind of situation might look something like this:</p>
+<pre><span class="code-keyword">void</span> CMySocketServer::ReadCompleted(
+   Socket *pSocket,
+   CIOBuffer *pBuffer)
+{
+   pBuffer = ProcessDataStream(pSocket, pBuffer);
+
+   pSocket-&gt;Read(pBuffer);
+}
+
+CIOBuffer *CMySocketServer::ProcessDataStream(
+   Socket *pSocket,
+   CIOBuffer *pBuffer)
+{
+   <span class="code-keyword">bool</span> done;
+
+   <span class="code-keyword">do</span>
+   {
+      done = <span class="code-keyword">true</span>;
+
+      <span class="code-keyword">const</span> size_t used = pBuffer-&gt;GetUsed();
+
+      <span class="code-keyword">if</span> (used &gt;= GetMinimumMessageSize())
+      {
+         <span class="code-keyword">const</span> size_t messageSize = GetMessageSize(pBuffer);
+
+         <span class="code-keyword">if</span> (used == messageSize)
+         {
+            <span class="code-comment">//</span><span class="code-comment"> we have a whole, distinct, message
+</span>
+            EchoMessage(pSocket, pBuffer);
+
+            pBuffer = <span class="code-digit">0</span>;
+
+            done = <span class="code-keyword">true</span>;
+         }
+         <span class="code-keyword">else</span> <span class="code-keyword">if</span> (used &gt; messageSize)
+         {
+            <span class="code-comment">//</span><span class="code-comment"> we have a message, plus some more data
+</span>            <span class="code-comment">//</span><span class="code-comment"> allocate a new buffer, copy the extra data into it and try again...
+</span>
+            CIOBuffer *pMessage = pBuffer-&gt;SplitBuffer(messageSize);
+
+            EchoMessage(pSocket, pMessage);
+
+            pMessage-&gt;Release();
+
+            <span class="code-comment">//</span><span class="code-comment"> loop again, we may have another complete message in there...
+</span>
+            done = <span class="code-keyword">false</span>;
+         }
+         <span class="code-keyword">else</span> <span class="code-keyword">if</span> (messageSize &gt; pBuffer-&gt;GetSize())
+         {
+            Output(_T(<span class="code-string">"</span><span class="code-string">Error: Buffer too small\nExpecting: "</span>) + ToString(messageSize) +
+               _T(<span class="code-string">"</span><span class="code-string">Got: "</span>) + ToString(pBuffer-&gt;GetUsed()) + _T(<span class="code-string">"</span><span class="code-string">\nBuffer size = "</span>) +
+               ToString(pBuffer-&gt;GetSize()) + _T(<span class="code-string">"</span><span class="code-string">\nData = \n"</span>) +
+               DumpData(pBuffer-&gt;GetBuffer(), pBuffer-&gt;GetUsed(), <span class="code-digit">40</span>));
+
+            pSocket-&gt;Shutdown();
+
+            <span class="code-comment">//</span><span class="code-comment"> throw the rubbish away
+</span>            pBuffer-&gt;Empty();
+
+            done = <span class="code-keyword">true</span>;
+         }
+      }
+   }
+   <span class="code-keyword">while</span> (!done);
+
+   <span class="code-comment">//</span><span class="code-comment"> not enough data in the buffer, reissue a read into the same buffer 
+</span>   <span class="code-comment">//</span><span class="code-comment"> to collect more data
+</span>   <span class="code-keyword">return</span> pBuffer;
+}
+</pre>
+<p>The key points of the code above are that we need to know if we have at least enough data to start
+looking at the header, if we do then we can work out the size of the message somehow. Once we know that
+we have the minimum amount of data required we can work out if we have all the data that makes up this
+message. If we do, great, we process it. If the buffer only contains our message then we simply process 
+the message and since processing simply involves us posting a write request for the data buffer we return 
+0 so that the next read uses a new buffer. If we have a complete message and some extra data then we 
+split the buffer into two, a new one with our complete message in it and the old one which has the extra 
+data copied to the front of the buffer. We then pass our complete message to the business logic to handle 
+and loop to handle the data that we had left over. If we don't have enough data we return the buffer and 
+the <code>Read()</code> that we issue in <code>ReadCompleted()</code> reads more data into the same buffer, 
+starting at the point that we're at now.</p>
+<p>Since we're a simple server we have a fairly important limitation, all our messages must fit into
+the IO buffer size that our server is using. Often this is a practical limitation, maximum message 
+sizes can be known in advance and by setting our IO buffer size to be at least our maximum message size 
+we avoid having to copy data around. If this isn't a viable limitation for your server then you'll need
+to have an alternative strategy here, copying data out of IO buffers and into something big enough to
+hold your whole message, or, processing the message in pieces...</p>
+<p>In our simple server if the message is too big then we simply shutdown the socket connection, throw
+away the garbage data, and wait for the client to go away...</p>
+<p>So how do we implement <code>GetMinimumMessageSize()</code> and <code>GetMessageSize()</code>, well, 
+obviously it's protocol dependant, but for our packet echo server we do it like this:</p>
+<pre><span class="code-sdkkeyword">size_t</span> CMySocketServer::GetMinimumMessageSize() <span class="code-keyword">const</span>
+{
+   <span class="code-keyword">return</span> <span class="code-digit">1</span>;
+}
+
+<span class="code-sdkkeyword">size_t</span> CMySocketServer::GetMessageSize(CIOBuffer *pBuffer) <span class="code-keyword">const</span>
+{
+   <span class="code-sdkkeyword">size_t</span> messageSize = *pBuffer-&gt;GetBuffer();
+
+   <span class="code-keyword">return</span> messageSize;
+}
+</pre>
+<h2>Reference counted buffers?</h2>
+<p>You may have noticed that in the case where we had a message and some extra data we called 
+<code>SplitBuffer()</code> to break the complete message out into its own buffer, and then, once we'd 
+dealt with it, we called <code>Release()</code>. This is a little of the implementation of the 
+socket server's buffer allocator poking through. The buffers are reference counted. The only time we 
+need to worry about this is if we create a new buffer using <code>SplitBuffer</code>, or if we decide 
+to call <code>AddRef()</code> on the buffer because we wish to pass it off to another thread for 
+processing. We'll cover this in more detail in the 
+<a href="http://www.codetools.com/internet/JBSocketServer2.asp">next article</a>,
+but the gist of it is that every time we post a read or a write the buffer's reference count goes up 
+and every time a read or write completes the count goes down, when there are no outstanding references
+the buffer goes back into the pool for reuse.</p>
+<h2>A packet echo server</h2>
+<p>A packet based echo server is available for download 
+<a href="http://www.codetools.com/internet/JBSocketServer1/JBSocketServer2.zip">here</a> in 
+JBSocketServer2.zip. The server expects to receive packets of up to 256 bytes which have a 1 byte header. 
+The header byte contains the total length of the packet (including the header). The server reads 
+complete packets and echoes them back to the client. You can test the echo server by using telnet, if 
+you're feeling clever <img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/smiley_wink.gif" align="top" alt="Wink | ;)">  Simply telnet to localhost on port 5001 (the port that the sample uses by 
+default) and type stuff and watch it get typed back at you. (Hint, CTRL B is 2 which is the smallest 
+packet that contains data).</p>
+<h2>A real internet RFC protocol</h2>
+<p>Some of the common internet protocols, such as RFC 1939 (POP3), use a crlf terminated ASCII text 
+stream command structure. An example of how such a server might be implemented using the
+<code>CSocketServer
+</code>
+classes presented here can be found in 
+<a href="http://www.codetools.com/internet/JBSocketServer1/JBSocketServer3.zip">JBSocketServer3.zip</a></p>
+<h2>What next?</h2>
+<p>The classes presented here provide an easy way to develop scalable socket servers using IO completion
+and thread pooling in such a way that the user of the classes need not concern themselves with these
+low level issues. To create your own server simply derive from <code>CSocketServer</code> and handle connection 
+establishment and the byte stream chunking and business logic. You can also opt to handle any of the 
+notifications that you require. Running your server is as simple as this:</p>
+<pre>CSocketServer server(
+   <span class="code-string">"</span><span class="code-string">+OK POP3 server ready\r\n"</span>,
+   INADDR_ANY,                   <span class="code-comment">//</span><span class="code-comment"> address to listen on
+</span>   <span class="code-digit">5001</span>,                         <span class="code-comment">//</span><span class="code-comment"> port to listen on
+</span>   <span class="code-digit">10</span>,                           <span class="code-comment">//</span><span class="code-comment"> max number of sockets to keep in the pool
+</span>   <span class="code-digit">10</span>,                           <span class="code-comment">//</span><span class="code-comment"> max number of buffers to keep in the pool
+</span>   <span class="code-digit">1024</span>);                        <span class="code-comment">//</span><span class="code-comment"> buffer size 
+</span>
+server.Start();
+
+server.StartAcceptingConnections();
+</pre>
+<p>Your code can then do whatever it likes and the socket server runs on its own threads. When you are
+finished, simply call:</p>
+<pre>server.WaitForShutdownToComplete();</pre>
+<p>And the socket server will shutdown.</p>
+<p>In the <a href="http://www.codetools.com/internet/JBSocketServer2.asp">next article</a> we 
+address the issue of moving the business logic out of the IO thread pool and
+into a thread pool of its own so that long operations don't block the IO threads.</p>  
+
+<h2>Revision history</h2>
+<ul>
+<li>21st May 2002 - Initial revision. </li>
+<li>27th May 2002 - Added pause/resume functionality to all servers and the server shutdown program. Use CSocket to protect from resource leaks when creating the listening socket. Refactored the Socket and CIOBuffer classes so that common list management code is now in CNodeList and common user data code is now in COpaqueUserData.</li>
+<li>29th May 2002 - Linting and general code cleaning</li>
+<li>18th June 2002 - Removed call to ReuseAddress() during the creation of the listening socket as it not required - Thanks to Alun Jones for pointing this out to me.</li>
+<li>28th June 2002 - Adjusted how we handle socket closure and added the graceful shutdown and socket closure sections to the article.</li>
+<li>30th June 2002 - Removed the requirement for users to subclass the worker thread class. All of the work
+can now be done by simply subclassing the socket server class.</li>
+<li>15th July 2002 - Socket closure notifications now occur when the server shuts down whilst there are active connections. SocketServer can now be set to ensure read and write packet sequences.</li>
+<li>12th August 2002 - Removed the race condition in socket closure - Thanks to David McConnell for pointing this out.
+Derived class can receive connection reset and connection error notifications. Socket provides a means to determine if
+send/receive are connected. General code cleaning and lint issues.</li>
+</ul>
+<h2>Other articles in the series</h2>
+<ol>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer1.asp">
+<i>A reusable socket server class</i></a></li>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer2.asp">
+Business logic processing in a socket server</a></li>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer3.asp">
+Speeding up socket server connections with AcceptEx</a></li>
+<li> <a href="http://www.codeproject.com/internet/ReusableSocketServer4.asp">
+Handling multiple pending socket read and write operations</a></li>
+<li> <a href="http://www.codeproject.com/csharp/TestingSocketServers.asp">
+Testing socket servers with C# and .Net</a></li>
+<li> <a href="http://www.codeproject.com/internet/COMSocketServer.asp">
+A high performance TCP/IP socket server COM component for VB</a></li>
+</ol>
+
+
+						</div>
+						
+
+						<div class="float-right" style="margin:20px 0 0 10px;border:1px solid #ccc">
+						
+						</div>
+                        
+                        
+						
+						<h2>License</h2>
+						<div id="LicenseTerms"><p>This article, along with any associated source code and files, is licensed under <a href="http://www.codeproject.com/info/cpol10.aspx" rel="license">The Code Project Open License (CPOL)</a></p></div>
+						
+
+                        
+						<h2>Share</h2>
+				        <div class="share-list">
+					        
+				        </div> 
+    			        
+
+
+						
+						<h2 id="ctl00_AboutHeading">About the Author</h2>
+						    
+
+
+<div class="author-wrapper">
+
+    <div class="pic-wrapper"> 
+        <img id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberPhoto" class="profile-pic" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/member_unknown.gif" style="border-width:0px;transform:rotate(-3deg);">
+
+    </div>
+
+    <div class="container-member">  
+        <b><a id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberProfileLink" class="author" href="http://www.codeproject.com/Members/Len-Holgate">Len Holgate</a></b>
+
+        <table class="extended">
+        <tbody><tr>
+            <td rowspan="2" nowrap="" valign="middle">
+            
+            </td>
+            <td width="100%">
+                <div class="company">
+                    <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberJobTitle">Software Developer (Senior)</span>
+	                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberCompany">JetByte Limited</span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberLocation">United Kingdom <img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/GB.gif" alt="United Kingdom" width="16px" height="11px"></span>
+            </td>
+        </tr>
+        </tbody></table>
+    </div>
+
+    <div class="description">
+        Len has been programming for over 30 years, having first started with a <a rel="nofollow" href="http://www.apj.co.uk/zx80/zx80_main_h.htm">Sinclair ZX-80</a>. Now he runs his own consulting company, <a rel="nofollow" href="http://www.jetbyte.com/">JetByte Limited</a> and has a technical blog <a rel="nofollow" href="http://www.lenholgate.com/">here</a>.<br>
+<br>
+JetByte provides contract programming and consultancy services. We can provide experience in COM, Corba, C++, Windows NT and UNIX. Our speciality is the design and implementation of systems but we are happy to work with you throughout the entire project life-cycle. We are happy to quote for fixed price work, or, if required, can work for an hourly rate. <br>
+<br>
+We are based in London, England, but, thanks to the Internet, we can work 'virtually' anywhere...<br>
+<br>
+Please note that many of the articles here may have updated code available on Len's <a rel="nofollow" href="http://www.lenholgate.com/">blog</a> and that the IOCP socket server framework is also available in a licensed, much improved and fully supported version, see <a rel="nofollow" href="http://www.serverframework.com/">here</a> for details.
+
+        
+    </div>
+
+</div><br>
+						
+						
+
+						<div class="clearfix"></div>
+
+						<div style="padding-top:8px">
+							
+						</div>
+
+					
+
+				    
+					</form>
+
+				</div>
+
+				
+				<div class="bottom-promo"> 
+				    
+				</div>
+				
+
+                
+        <h2 id="ctl00_AlsoRead_RelatedResults_ctl00_Header" class="also-read">You may also be interested in...</h2>
+        <table class="spaced content-list also-read">
+    
+	    <tbody><tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Thumbnail" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Link" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers">The Microsoft Cloud Platform for Developers</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Thumbnail" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/Thumb-1086365.jpg" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Link" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT">The Past, Present, and Future of IoT</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Thumbnail" href="http://www.codeproject.com/Articles/1086361/Java-for-Bluetooth-LE-applications"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Link" href="http://www.codeproject.com/Articles/1086361/Java-for-Bluetooth-LE-applications">Java for Bluetooth LE applications </a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Thumbnail" href="http://www.codeproject.com/Articles/1082383/Make-your-website-mobile-friendly-using-Bootstrap"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Link" href="http://www.codeproject.com/Articles/1082383/Make-your-website-mobile-friendly-using-Bootstrap">Make your website mobile friendly using Bootstrap</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Thumbnail" href="http://www.codeproject.com/Articles/1082381/Building-Modern-Web-Apps-with-ASP-NET-MVC"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Link" href="http://www.codeproject.com/Articles/1082381/Building-Modern-Web-Apps-with-ASP-NET-MVC">Building Modern Web Apps with ASP.NET MVC 6</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Thumbnail" href="http://www.codeproject.com/Articles/1085643/Looking-Ahead-to-Csharp-with-Mads-Torgersen"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Link" href="http://www.codeproject.com/Articles/1085643/Looking-Ahead-to-Csharp-with-Mads-Torgersen">Looking Ahead to C# 7 with Mads Torgersen</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+		</tbody></table>
+	
+
+
+
+				
+				
+
+					<h2>Comments and Discussions</h2>
+					
+					<p><img alt="Comment" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/NewComment.gif" width="12px" height="16px">
+					<b>472 messages</b> have been posted for this article 
+					Visit <b><a id="ctl00_ArticleLink" href="http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa">http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa</a></b> to post and view comments on 
+					this article, or click <b><a id="ctl00_PrintWithMessage" href="http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa?display=PrintAll">here</a></b> 
+					to get a print view with messages.</p>
+					
+				
+
+			</div>
+			
+		</td>
+		<td width="170px" class="article-wing-right">
+			
+		</td>
+		</tr></tbody></table>
+
+		
+		<div class="theme1-background" style="height:2px" id="stickyStop"></div>
+
+		<div class="extended tiny-text">
+			<div class="row">
+				<div class="float-left">
+					<a id="ctl00_PermaLink" itemprop="url" href="http://www.codeproject.com/Articles/2336/A-reusable-high-performance-socket-server-class-Pa">Permalink</a> | 
+					<a id="ctl00_AdvertiseLink" href="http://developermedia.com/">Advertise </a> |
+					<a id="ctl00_PrivacyLink" href="http://www.codeproject.com/info/privacy.aspx">Privacy</a> |
+                    <a id="ctl00_TermsOfUseLink" href="http://www.codeproject.com/info/TermsOfUse.aspx">Terms of Use</a> |
+					<a id="ctl00_Mobile">Mobile</a>
+					<br>
+								
+					
+					Web01 |
+					2.8.160311.1 |
+					Last Updated 18 Aug 2002								
+				</div>
+
+                <div id="ctl00_GoogleTranslate" class="translate float-left"><div class="skiptranslate goog-te-gadget" dir="ltr"><div id=":0.targetLanguage" class="goog-te-gadget-simple" style="white-space: nowrap;"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/cleardot.gif" class="goog-te-gadget-icon" style="background-image: url(&quot;https://translate.googleapis.com/translate_static/img/te_ctrl3.gif&quot;); background-position: -65px 0px;"><span style="vertical-align: middle;"><a class="goog-te-menu-value" href="javascript:void(0)"><span>选择语言</span><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/cleardot.gif" width="1" height="1"><span style="border-left-width: 1px; border-left-style: solid; border-left-color: rgb(187, 187, 187);">​</span><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/cleardot.gif" width="1" height="1"><span style="color: rgb(155, 155, 155);">▼</span></a></span></div></div></div>      
+
+				<div class="float-right align-right">
+					Article Copyright 2002 by Len Holgate<br>Everything else
+					Copyright © <a href="mailto:webmaster@codeproject.com">CodeProject</a>, 1999-2016 <br>
+				</div>
+
+				
+
+			</div>
+		</div>
+		
+
+		<br clear="all">
+		
+			
+
+	</div> 
+	</div>
+</div>
+
+
+
+
+
+
+<script type="text/javascript" language="Javascript" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/jquery.min.js"></script><script type="text/javascript">//<![CDATA[
+if (typeof jQuery == 'undefined') {
+    document.write(unescape("%3Cscript src='/script/JS/jquery-1.6.2.min.js' type='text/javascript' %3E%3C/script%3E"));
+}//]]></script>
+<script type="text/javascript" language="Javascript" src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/element.js"></script>
+<script type="text/javascript" language="Javascript">//<![CDATA[
+$(document).ready(function () { processCodeBlocks.Initialise('#contentdiv'); });
+function googleTranslateElementInit() {  new google.translate.TranslateElement({   pageLanguage: 'en',   layout: google.translate.TranslateElement.InlineLayout.SIMPLE,   autoDisplay: false,   gaTrack: true,   gaId: 'UA-1735123-1'},  'ctl00_GoogleTranslate');}
+$(document).ready(function() { anchorAnimate();
+});
+
+//]]>
+</script><div id="goog-gt-tt" class="skiptranslate" dir="ltr"><div style="padding: 8px;"><div><div class="logo"><img src="./A reusable, high performance, socket server class - Part 1 - CodeProject_files/translate_24dp.png" width="20" height="20"></div></div></div><div class="top" style="padding: 8px; float: left; width: 100%;"><h1 class="title gray">原文</h1></div><div class="middle" style="padding: 8px;"><div class="original-text"></div></div><div class="bottom" style="padding: 8px;"><div class="activity-links"><span class="activity-link">提供更好的翻译建议</span><span class="activity-link"></span></div><div class="started-activity-container"><hr style="color: #CCC; background-color: #CCC; height: 1px; border: none;"><div class="activity-root"></div></div></div><div class="status-message" style="display: none;"></div></div>
+
+
+
+<iframe frameborder="0" class="goog-te-menu-frame skiptranslate" style="visibility: visible; box-sizing: content-box; width: 937px; height: 263px; display: none;"></iframe></body></html>

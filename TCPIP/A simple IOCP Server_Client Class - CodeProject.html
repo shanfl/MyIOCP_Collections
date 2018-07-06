@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<!-- saved from url=(0089)http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class?display=Print -->
+<html style="height: 100%;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>A simple IOCP Server/Client Class - CodeProject</title> 
+	<link type="text/css" rel="stylesheet" href="./A simple IOCP Server_Client Class - CodeProject_files/Main.min.css">
+
+	
+
+<meta name="Description" content="This source code uses the advanced IOCP technology which can efficiently serve multiple clients. It also presents some solutions to practical problems that arise with the IOCP programming API, and provides a simple echo client/server with file transfer.; Author: spinoza; Updated: 11 Dec 2008; Section: Internet / Network; Chapter: General Programming; Updated: 11 Dec 2008">
+<meta name="Keywords" content="VC6, VC7, VC7.1, .NET1.0, .NET1.1, Win2K, WinXP, Win2003, VS.NET2003, C++, C++/CLI, Windows, .NET, Visual-Studio, MFC, Dev, Intermediate,Internet / Network,General Programming,Free source code, tutorials">
+<meta name="Author" content="spinoza">
+<meta name="Rating" content="General">
+<meta name="Revisit-After" content="1 days">
+<meta name="application-name" content="CodeProject">
+<meta name="google-translate-customization" content="d908bb7ce7aff658-4c2f3a504525c916-g629383f736781a8a-13">
+
+<link rel="dns-prefetch" href="http://ajax.googleapis.com/"> 
+
+
+
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - All Topics" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=1">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Android" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=22">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - iOS" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=25">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C++" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=2">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C#" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=3">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Web" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=23">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Lounge Postings" href="http://www.codeproject.com/webservices/LoungeRSS.aspx">
+<meta name="robots" content="index, follow">
+<link rel="search" type="application/opensearchdescription+xml" title="CodeProject" href="http://www.codeproject.com/info/OpenSearch.xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!--<base target="_top">--><base href="." target="_top">
+	<link rel="icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="shortcut icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="apple-touch-icon" href="http://www.codeproject.com/images/FavIcon-Apple.png" type="image/png">
+<script type="text/javascript" language="Javascript">//<![CDATA[
+function defrm () { /* thanks twitter */ document.write = ''; window.top.location = window.self.location;  setTimeout(function() { document.body.innerHTML = ''; }, 0);  window.self.onload = function(evt) { document.body.innerHTML = ''; }; }if (window.top !== window.self) {  try {  if (window.top.location.host) { /* will throw */ } else { defrm(); /* chrome */ }  } catch (ex) { defrm(); /* everyone else */ } }if (typeof(DemoUrl)!='undefined')   document.write(unescape('%3Cme')+'ta http'+'-equiv="re'+'fresh"                  con'+'tent="1;url='+DemoUrl+unescape('"%3CE'));
+
+//]]>
+</script>
+
+	
+
+
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-1735123-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_setDomainName', 'www.codeproject.com']);
+	_gaq.push(['_setSessionTimeout', '1200']); 
+
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+	})(); 
+</script><script type="text/javascript" async="" src="./A simple IOCP Server_Client Class - CodeProject_files/ga.js"></script>
+
+
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="./A simple IOCP Server_Client Class - CodeProject_files/translateelement.css"><script type="text/javascript" charset="UTF-8" src="./A simple IOCP Server_Client Class - CodeProject_files/main_zh-CN.js"></script><script type="text/javascript" charset="UTF-8" src="./A simple IOCP Server_Client Class - CodeProject_files/element_main.js"></script></head>	
+
+<body class="chrome chrome47 touch" style="position: relative; min-height: 100%; top: 0px;">
+
+<a class="access-link" href="http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class?display=Print#Main"><img alt="Click here to Skip to main content" src="./A simple IOCP Server_Client Class - CodeProject_files/t.gif"></a>
+
+
+
+
+
+<div class="page-background">
+
+	
+	
+
+	
+
+	
+    <div id="ctl00_STM" class="site-top-menu fluid">
+        <div class="main-content">
+            
+        </div>
+    </div>
+
+	
+    <div id="ctl00_SH" class="site-header fluid">
+        <div class="main-content">
+            <div class="logo"><a href="http://www.codeproject.com/"><img id="ctl00_Logo" tabindex="1" title="CodeProject" src="./A simple IOCP Server_Client Class - CodeProject_files/logo250x135.gif" alt="Home" style="height:135px;width:250px;border-width:0px;"></a></div>
+            <div class="promo"></div>
+        </div>
+    </div>
+
+	<a href="http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class?display=Print#Main"><img alt="Click here to Skip to main content" class="access-link" src="./A simple IOCP Server_Client Class - CodeProject_files/t.gif"></a>
+
+	
+			
+	
+
+	<div id="A" class="container-content-wrap fluid print"> 
+
+	<div itemscope="" itemtype="http://schema.org/Article" class="container-content"> 
+
+
+		<div class="clearfix">
+			<div class="container-breadcrumb float-left ">
+				<div><a href="http://www.codeproject.com/script/Content/SiteMap.aspx">Articles</a> » <a href="http://www.codeproject.com/Chapters/6/General-Programming.aspx">General Programming</a> » <a href="http://www.codeproject.com/KB/IP/"><span itemprop="articleSection">Internet / Network</span></a> » <a href="http://www.codeproject.com/KB/IP/#Client%2fServer+Development">Client/Server Development</a></div>
+			</div>
+
+			<div class="float-left">
+				
+			</div>
+
+			<div class="edit-links float-right">
+				
+			</div>
+
+			<div class="article-nav float-right">
+					
+		        
+		        
+					
+
+                
+				
+			</div>
+		</div>
+
+		<table class="extended container-article-parts" cellpadding="0" cellspacing="0">
+        <tbody><tr valign="top">
+		<td width="117px" class="article-wing-left">
+
+			
+
+		</td>
+		<td>
+			
+			<div id="AT" class="container-article  fluid tight"> 
+
+				<div class="article">
+
+					<form name="aspnetForm" method="post" action="./A simple IOCP Server_Client Class - CodeProject_files/A simple IOCP Server_Client Class - CodeProject.html" id="aspnetForm" style="margin:0;padding:0">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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">
+</div>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="10C1FD69">
+</div>
+
+					
+					 
+					<div class="header">
+					    <a name="Main"></a>
+
+					    
+					    <a name="_articleTop" id="_articleTop"></a>
+					    <div class="title">
+					        
+					        <h1 id="ctl00_ArticleTitle" itemprop="name">A simple IOCP Server/Client Class</h1> 
+					    </div>
+
+                        <div style="height:34px">
+					        
+					        <div class="entry float-left">
+                                <img src="./A simple IOCP Server_Client Class - CodeProject_files/{111E8876-D021-4447-8462-8BB53BC0DDF0}.jpg" id="ctl00_avatar" class="float-left avatar">
+                                <div class="float-left">
+
+						            <span class="author"><a href="http://www.codeproject.com/script/Membership/View.aspx?mid=431028" rel="author"><span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><span itemprop="name">spinoza</span></span></a></span>, 
+						            <span class="date" itemprop="dateModified" title="Date last updated" content="2008-12-11 11:14:00">
+							            12 Dec 2008</span>
+			
+                                    <a id="ctl00_LicenseLink" title="The Code Project Open License (CPOL)" class="license" href="http://www.codeproject.com/info/cpol10.aspx">CPOL</a><div id="ctl00_CurRat" class="tooltip anchorLink" style="cursor:pointer;margin-top: 5px">
+				
+							            
+
+<table cellpadding="0" cellspacing="0" class="small-text" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating"> 
+<tbody><tr>
+	
+	<td class="nowrap">
+
+		
+			<meta itemprop="bestRating" content="5"> 
+			<meta itemprop="worstRating" content="1">
+		
+
+		<span id="ctl00_ArticleRating_VI">
+		<div class="nowrap rating-stars-medium" style="height:18px;width:80px;position:relative;">
+	<div class="clipped align-left float-left" style="height:16px;width:78px;">
+		<img src="./A simple IOCP Server_Client Class - CodeProject_files/stars-fill-md.png" style="border-width:0px;">
+	</div><div class="clipped" style="height:16px;width:2px;position:relative;">
+		<img src="./A simple IOCP Server_Client Class - CodeProject_files/stars-empty-md.png" style="border-width:0px;position:absolute;top:0;right:0;">
+	</div>
+</div>
+		</span>
+
+		
+	</td>
+	
+	<td id="ctl00_ArticleRating_VR" class="nowrap">
+		&nbsp;
+		<span id="ctl00_ArticleRating_VotesR">&nbsp;<span itemprop="ratingValue" class="rating">4.91</span> (<span itemprop="ratingCount" class="count">187</span> votes)</span>
+		
+	</td>
+
+</tr>
+
+</tbody></table>
+
+
+							            <div id="ctl00_RB" class="speech-bubble-container-up">
+								            <div class="speech-bubble-up" style="width:150px !important">
+									                        
+<div>
+<table class="feature" width="100%" height="20px" title="Voting Distribution. Recent data only" cellpadding="0" cellspacing="0"><tbody><tr class="chart-row"><td class="chart-column"><div class="rating-ignore-vote" title="Votes not included in score."><img src="./A simple IOCP Server_Client Class - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="1 vote, 0.6%" title="1 vote, 0.6%"></div><span title="0 votes">1</span></td>
+<td class="chart-column"><div class="rating-ignore-vote" title="Votes not included in score."><img src="./A simple IOCP Server_Client Class - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="4 votes, 2.2%" title="4 votes, 2.2%"></div><span title="0 votes">2</span></td>
+<td class="chart-column"><div class="rating-ignore-vote" title="Votes not included in score."><img src="./A simple IOCP Server_Client Class - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="1 vote, 0.6%" title="1 vote, 0.6%"></div><span title="0 votes">3</span></td>
+<td class="chart-column"><div><img src="./A simple IOCP Server_Client Class - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="15 votes, 8.3%" title="15 votes, 8.3%"></div><span title="15 votes">4</span></td>
+<td class="chart-column"><div><img src="./A simple IOCP Server_Client Class - CodeProject_files/pollcol.gif" width="20pxpx" height="20px" border="0px" alt="165 votes, 91.7%" title="165 votes, 91.7%"></div><span title="165 votes">5</span></td>
+</tr></tbody></table><div class="small-text align-center">4.91/5 - 187 votes</div><div class="small-text align-center subdue">6 removed</div><div class="small-text align-center subdue">μ 4.80, σ<sub>a</sub> 1.11 [<a href="http://www.codeproject.com/KB/FAQs/RatingReputationFAQ.aspx#noisefilter">?</a>]</div>
+</div>
+								            </div>
+								            <div class="speech-bubble-pointer-up">
+									            <div class="speech-bubble-pointer-up-inner"></div>
+								            </div>
+							            </div>
+						            </div>
+                                </div>
+					        </div>
+
+                            
+						    
+						    	
+                        </div>
+
+   					    
+                        <div id="ctl00_description" class="summary" itemprop="headline">This source code uses the advanced IOCP technology which can efficiently serve multiple clients. It also presents some solutions to practical problems that arise with the IOCP programming API, and provides a simple echo client/server with file transfer.</div><span id="ctl00_thumbnailUrl" class="date" itemprop="image" content="http://www.codeproject.com/KB/IP/iocp_server_client/Thumb-10330.gif"></span>			
+
+                    </div>
+                    
+					
+					
+
+					
+
+					
+					
+					
+
+						
+					
+
+					
+
+						
+						<div id="contentdiv" class="text" itemprop="articleBody">
+						
+
+
+
+<ul class="download">
+<li><a href="http://www.codeproject.com/KB/IP/iocp_server_client/IOCP-Demo.zip">Download demo project v.1.16 - 64.66 Kb</a> </li>
+
+<li><a href="http://www.codeproject.com/KB/IP/iocp_server_client/IOCP-SRC.zip">Download source v1.16 - 154.59 Kb</a> </li>
+
+<li>Download other client/server implementations using this source code, <a href="http://www.codeproject.com/internet/YourOwnSecureProtocol.asp" target="_blank">here</a>. </li>
+</ul>
+
+<p><img height="476" src="./A simple IOCP Server_Client Class - CodeProject_files/Echo.gif" width="496"></p>
+
+<h2>1.1 Requirements</h2>
+
+<ul>
+<li>The article expects the reader to be familiar with C++, TCP/IP, socket programming, MFC, and multithreading. </li>
+
+<li>The source code uses Winsock 2.0 and the IOCP technology, and requires: 
+<ul>
+<li>Windows NT/2000 or later: Requires Windows NT 3.5 or later. </li>
+
+<li>Windows 95/98/ME: Not supported. </li>
+
+<li>Visual C++ .NET, or a fully updated Visual C++ 6.0. </li>
+</ul>
+</li>
+</ul>
+
+<h2>1.2 Abstract</h2>
+
+<p>When you develop different types of software, sooner or later, you will have to deal with client/server development. To write a comprehensive client/server code is a difficult task for a programmer. This documentation presents a simple but powerful client/server source code that can be extended to any type of client/server application. This source code uses the advanced IOCP technology which can efficiently serve multiple clients. IOCP presents an efficient solution to the "one-thread-per-client" bottleneck problem (among others), using only a few processing threads and asynchronous input/output send/receive. The IOCP technology is widely used for different types of high performance servers as Apache etc. The source code also provides a set of functions that are frequently used while dealing with communication and client/server software as file receiving/transferring function and logical thread pool handling. This article focuses on the practical solutions that arise with the IOCP programming API, and also presents an overall documentation of the source code. Furthermore, a simple echo client/server which can handle multiple connections and file transfer is also presented here.</p>
+
+<h2>2.1 Introduction</h2>
+
+<p>This article presents a class which can be used in both the client and server code. The class uses IOCP (Input Output Completion Ports) and asynchronous (non-blocking) function calls which are explained later. The source code is based on many other source codes and articles: [1, 2, and 3].</p>
+
+<p>With this simple source code, you can:</p>
+
+<ul>
+<li>Service or connect to multiple clients and servers. </li>
+
+<li>Send or receive files asynchronously. </li>
+
+<li>Create and manage a logical worker thread pool to process heavier client/server requests or computations. </li>
+</ul>
+
+<p>It is difficult to find a comprehensive but simple source code to handle client/server communications. The source codes that are found on the net are either too complex (20+ classes), or don’t provide sufficient efficiency. This source code is designed to be as simple and well documented as possible. In this article, we will briefly present the IOCP technology provided by Winsock API 2.0, and also explain the thorny problems that arise while coding and the solution to each one of them.</p>
+
+<h2>2.2 Introduction to asynchronous Input/Output Completion Ports (IOCP)</h2>
+
+<p>A server application is fairly meaningless if it cannot service multiple clients at the same time, usually asynchronous I/O calls and multithreading is used for this purpose. By definition, an asynchronous I/O call returns immediately, leaving the I/O call pending. At some point of time, the result of the I/O asynchronous call must be synchronized with the main thread. This can be done in different ways. The synchronization can be performed by:</p>
+
+<ul>
+<li>Using events - A signal is set as soon as the asynchronous call is finished. The disadvantage of this approach is that the thread has to check or wait for the event to be set. </li>
+
+<li>Using the <code>GetOverlappedResult</code> function - This approach has the same disadvantage as the approach above. </li>
+
+<li>Using Asynchronous Procedure Calls (or APC) - There are several disadvantages associated with this approach. First, the APC is always called in the context of the calling thread, and second, in order to be able to execute the APCs, the calling thread has to be suspended in the so called alterable wait state. </li>
+
+<li>Using IOCP - The disadvantage of this approach is that there are many practical thorny programming problems that must be solved. Coding IOCP can be a bit of a hassle. </li>
+</ul>
+
+<h3>2.2.1 Why using IOCP?</h3>
+
+<p>By using IOCP, we can overcome the "one-thread-per-client" problem. It is commonly known that the performance decreases heavily if the software does not run on a true multiprocessor machine. Threads are system resources that are neither unlimited nor cheap.</p>
+
+<p>IOCP provides a way to have a few (I/O worker) threads handle multiple clients' input/output "fairly". The threads are suspended, and don't use the CPU cycles until there is something to do.</p>
+
+<h2>2.3 What is IOCP?</h2>
+
+<p>We have already stated that IOCP is nothing but a thread synchronization object, similar to a semaphore, therefore IOCP is not a sophisticated concept. An IOCP object is associated with several I/O objects that support pending asynchronous I/O calls. A thread that has access to an IOCP can be suspended until a pending asynchronous I/O call is finished.</p>
+
+<h2>3 How does IOCP work?</h2>
+
+<p>To get more information on this part, I referred to other articles. [1, 2, 3, see References.]</p>
+
+<p>While working with IOCP, you have to deal with three things, associating a socket to the completion port, making the asynchronous I/O call, and synchronization with the thread. To get the result from the asynchronous I/O call and to know, for example, which client has made the call, you have to pass two parameters: the <code>CompletionKey</code> parameter, and the <code>OVERLAPPED</code> structure.</p>
+
+<h2>3.1 The completion key parameter</h2>
+
+<p>The first parameter, the <code>CompletionKey</code>, is just a variable of type <code>DWORD</code>. You can pass whatever unique value you want to, that will always be associated with the object. Normally, a pointer to a structure or a class that can contain some client specific objects is passed with this parameter. In the source code, a pointer to a structure <code>ClientContext</code> is passed as the <code>CompletionKey</code> parameter.</p>
+
+<h2>3.2 The OVERLAPPED parameter</h2>
+
+<p>This parameter is commonly used to pass the memory buffer that is used by the asynchronous I/O call. It is important to note that this data will be locked and is not paged out of the physical memory. We will discuss this later.</p>
+
+<h2>3.3 Associating a socket with the completion port</h2>
+
+<p>Once a completion port is created, the association of a socket with the completion port can be done by calling the function <code>CreateIoCompletionPort</code> in the following way:</p>
+
+<pre lang="C++">BOOL IOCPS::AssociateSocketWithCompletionPort(SOCKET socket, 
+               HANDLE hCompletionPort, DWORD dwCompletionKey)
+   {
+       HANDLE h = CreateIoCompletionPort((HANDLE) socket, 
+             hCompletionPort, dwCompletionKey, m_nIOWorkers);
+       <span class="code-keyword">return</span> h == hCompletionPort;
+   }</pre>
+
+<h2>3.4 Making the asynchronous I/O call</h2>
+
+<p>To make the actual asynchronous call, the functions <code>WSASend</code>, <code>WSARecv</code> are called. They also need to have a parameter <code>WSABUF</code>, that contains a pointer to a buffer that is going to be used. A rule of thumb is that normally when the server/client wants to call an I/O operation, they are not made directly, but is posted into the completion port, and is performed by the I/O worker threads. The reason for this is, we want the CPU cycles to be partitioned fairly. The I/O calls are made by posting a status to the completion port, see below:</p>
+
+<pre lang="C++">BOOL bSuccess = PostQueuedCompletionStatus(m_hCompletionPort, 
+                       pOverlapBuff-&gt;GetUsed(), 
+                       (DWORD) pContext, &amp;pOverlapBuff-&gt;m_ol);</pre>
+
+<h2>3.5 Synchronization with the thread</h2>
+
+<p>Synchronization with the I/O worker threads is done by calling the <code>GetQueuedCompletionStatus</code> function (see below). The function also provides the <code>CompletionKey</code> parameter and the <code>OVERLAPPED</code> parameter (see below):</p>
+
+<pre lang="C++">BOOL GetQueuedCompletionStatus(
+   HANDLE CompletionPort, <span class="code-comment">//</span><span class="code-comment"> handle to completion port
+</span>
+   LPDWORD lpNumberOfBytes, <span class="code-comment">//</span><span class="code-comment"> bytes transferred
+</span>
+   PULONG_PTR lpCompletionKey, <span class="code-comment">//</span><span class="code-comment"> file completion key
+</span>
+   LPOVERLAPPED *lpOverlapped, <span class="code-comment">//</span><span class="code-comment"> buffer
+</span>
+   DWORD dwMilliseconds <span class="code-comment">//</span><span class="code-comment"> optional timeout value
+</span>
+   );</pre>
+
+<h2>3.6 Four thorny IOCP coding hassles and their solutions</h2>
+
+<p>There are some problems that arise while using IOCP, some of them are not intuitive. In a multithreaded scenario using IOCPs, the control flow of a thread function is not straightforward, because there is no relationship between threads and communications. In this section, we will represent four different problems that can occur while developing client/server applications using IOCPs. They are:</p>
+
+<ul>
+<li>The WSAENOBUFS error problem. </li>
+
+<li>The package reordering problem. </li>
+
+<li>The access violation problem. </li>
+</ul>
+
+<h3>3.6.1 The WSAENOBUFS error problem</h3>
+
+<p>This problem is non intuitive and difficult to detect, because at first sight, it seems to be a normal deadlock or a memory leakage "bug". Assume that you have developed your server and everything runs fine. When you stress test the server, it suddenly hangs. If you are lucky, you can find out that it has something to do with the WSAENOBUFS error.</p>
+
+<p>With every overlapped send or receive operation, it is possible that the data buffer submitted will be locked. When memory is locked, it cannot be paged out of physical memory. The operating system imposes a limit on the amount of memory that can be locked. When this limit is reached, the overlapped operations will fail with the WSAENOBUFS error.</p>
+
+<p>If a server posts many overlapped receives on each connection, this limit will be reached when the number of connections grow. If a server anticipates handling a very high number of concurrent clients, the server can post a single zero byte receive on each connection. Because there is no buffer associated with the receive operation, no memory needs to be locked. With this approach, the per-socket receive buffer should be left intact because once the zero-byte receive operation is completed, the server can simply perform a non-blocking receive to retrieve all the data buffered in the socket's receive buffer. There is no more data pending when the non-blocking receive fails with <code>WSAEWOULDBLOCK</code>. This design would be for the one that requires the maximum possible concurrent connections while sacrificing the data throughput on each connection. Of course, the more you know about how the clients interact with the server, the better. In the previous example, a non-blocking receive was performed once the zero-byte receive completes retrieving the buffered data. If the server knows that clients send data in bursts, then once the zero-byte receive is completed, it may post one or more overlapped receives in case the client sends a substantial amount of data (greater than the per-socket receive buffer that is 8 KB by default).</p>
+
+<p>A simple practical solution to the WSAENOBUFS error problem is in the source code provided. We perform an asynchronous <code>WSARead(..)</code> (see <code>OnZeroByteRead(..)</code>) with a zero byte buffer. When this call completes, we know that there is data in the TCP/IP stack, and we read it by performing several asynchronous <code>WSARead(..)</code> with a buffer of <code>MAXIMUMPACKAGESIZE</code>. This solution locks physical memory only when data arrives, and solves the WSAENOBUFS problem. But this solution decreases the throughput of the server (see Q6 and A6 in section 9 F.A.Q).</p>
+
+<h3>3.6.2 The package reordering problem</h3>
+
+<p>This problem is also being discussed by [3]. Although committed operations using the IO completion port will always be completed in the order they were submitted, thread scheduling issues may mean that the actual work associated with the completion is processed in an undefined order. For example, if you have two I/O worker threads and you should receive "byte chunk 1, byte chunk 2, byte chunk 3", you may process the byte chunks in the wrong order, namely, "byte chunk 2, byte chunk 1, byte chunk 3". This also means that when you are sending the data by posting a send request on the I/O completion port, the data can actually be sent in a reordered way.</p>
+
+<p>This can be solved by only using one worker thread, and committing only one I/O call and waiting for it to finish, but if we do this, we lose all the benefits of IOCP.</p>
+
+<p>A simple practical solution to this problem is to add a sequence number to our buffer class, and process the data in the buffer if the buffer sequence number is in order. This means that the buffers that have incorrect numbers have to be saved for later use, and because of performance reasons, we will save the buffers in a hash map object (e.g., <code>m_SendBufferMap</code> and <code>m_ReadBufferMap</code>).</p>
+
+<p>To get more information about this solution, please go through the source code, and take a look at the following functions in the <code>IOCPS</code> class:</p>
+
+<ul>
+<li><code>GetNextSendBuffer (..)</code> and <code>GetNextReadBuffer(..)</code>, to get the ordered send or receive buffer. </li>
+
+<li><code>IncreaseReadSequenceNumber(..)</code> and <code>IncreaseSendSequenceNumber(..)</code>, to increase the sequence numbers. </li>
+</ul>
+
+<h3>3.6.3 Asynchronous pending reads and byte chunk package processing problem</h3>
+
+<p>The most common server protocol is a packet based protocol where the first X bytes represent a header and the header contains details of the length of the complete packet. The server can read the header, work out how much more data is required, and keep reading until it has a complete packet. This works fine when the server is making one asynchronous read call at a time. But if we want to use the IOCP server's full potential, we should have several pending asynchronous reads waiting for data to arrive. This means that several asynchronous reads complete out of order (as discussed before in section 3.6.2), and byte chunk streams returned by the pending reads will not be processed in order. Furthermore, a byte chunk stream can contain one or several packages and also partial packages, as shown in figure 1.</p>
+
+<p><img height="239" src="./A simple IOCP Server_Client Class - CodeProject_files/Readchunk.gif" width="291"></p>
+
+<div class="caption">Figure 1. The figure shows how partial packages (green) and complete packages (yellow) can arrive asynchronously in different byte chunk streams (marked 1, 2, 3).</div>
+
+<p>This means that we have to process the byte stream chunks in order to successfully read a complete package. Furthermore, we have to handle partial packages (marked with green in figure 1). This makes the byte chunk package processing more difficult. The full solution to this problem can be found in the <code>ProcessPackage(..)</code> function in the <code>IOCPS</code> class.</p>
+
+<h3>3.6.4 The access violation problem</h3>
+
+<p>This is a minor problem, and is a result of the design of the code, rather than an IOCP specific problem. Suppose that a client connection is lost and an I/O call returns with an error flag, then we know that the client is gone. In the parameter <code>CompletionKey</code>, we pass a pointer to a structure <code>ClientContext</code> that contains client specific data. What happens if we free the memory occupied by this <code>ClientContext</code> structure, and some other I/O call performed by the same client returns with an error code, and we transform the parameter <code>CompletionKey</code> variable of <code>DWORD</code> to a pointer to <code>ClientContext</code>, and try to access or delete it? An access violation occurs!</p>
+
+<p>The solution to this problem is to add a number to the structures that contain the number of pending I/O calls (<code>m_nNumberOfPendlingIO</code>), and we delete the structure when we know that there are no more pending I/O calls. This is done by the <code>EnterIoLoop(..)</code> function and <code>ReleaseClientContext(..)</code>.</p>
+
+<h2>3.7 The overview of the source code</h2>
+
+<p>The goal of the source code is to provide a set of simple classes that handle all the hassled code that has to do with IOCP. The source code also provides a set of functions which are frequently used while dealing with communication and client/server software as file receiving/transferring functions, logical thread pool handling, etc..</p>
+
+<p><img height="495" src="./A simple IOCP Server_Client Class - CodeProject_files/Overview.gif" width="496"></p>
+
+<div class="caption">Figure 2. The figure above illustrates an overview of the <code>IOCP</code> class source code functionality.</div>
+
+<p>We have several IO worker threads that handle asynchronous I/O calls through the completion port (IOCP), and these workers call some virtual functions which can put requests that need a large amount of computation in a work queue. The logical workers take the job from the queue, and process it and send back the result by using some of the functions provided by the class. The Graphical User Interface (GUI) usually communicates with the main class using Windows messages (because MFC is not thread safe) and by calling functions or by using the shared variables.</p>
+
+<p><img height="363" src="./A simple IOCP Server_Client Class - CodeProject_files/Overview2.gif" width="280"></p>
+
+<div class="caption">Figure 3. The figure above shows the class overview.</div>
+
+<p>The classes that can be observed in figure 3 are:</p>
+
+<ul>
+<li><code>CIOCPBuffer</code>: A class used to manage the buffers used by the asynchronous I/O calls. </li>
+
+<li><code>IOCPS</code>: The main class that handles all the communication. </li>
+
+<li><code>JobItem</code>: A structure which contains the job to be performed by the logical worker threads. </li>
+
+<li><code>ClientContext</code>: A structure that holds client specific information (status, data, etc.). </li>
+</ul>
+
+<h3>3.7.1 The buffer design – The CIOCPBuffer class</h3>
+
+<p>When using asynchronous I/O calls, we have to provide a private buffer to be used with the I/O operation. There are some considerations that are to be taken into account when we allocate buffers to use:</p>
+
+<ul>
+<li>To allocate and free memory is expensive, therefore we should reuse buffers (memory) which have been allocated. Therefore, we save buffers in the linked list structures given below: 
+<pre lang="C++"><span class="code-comment">//</span><span class="code-comment"> Free Buffer List.. 
+</span>
+   CCriticalSection m_FreeBufferListLock;
+   CPtrList m_FreeBufferList;
+<span class="code-comment">//</span><span class="code-comment"> OccupiedBuffer List.. (Buffers that is currently used) 
+</span>
+   CCriticalSection m_BufferListLock;
+   CPtrList m_BufferList; 
+<span class="code-comment">//</span><span class="code-comment"> Now we use the function AllocateBuffer(..) 
+</span>
+<span class="code-comment">//</span><span class="code-comment"> to allocate memory or reuse a buffer.</span></pre>
+</li>
+
+<li>Sometimes, when an asynchronous I/O call is completed, we may have partial packages in the buffer, therefore the need to split the buffer to get a complete message. This is done by the <code>SplitBuffer</code> function in the <code>CIOCPS</code> class. Also, sometimes we need to copy information between the buffer, and this is done by the <code>AddAndFlush(..)</code> function in the <code>IOCPS</code> class. </li>
+
+<li>As we know, we also need to add a sequence number and a state (<code>IOType</code> variable, <code>IOZeroReadCompleted</code>, etc.) to our buffer. </li>
+
+<li>We also need methods to convert data to byte stream and byte stream to data, some of these functions are also provided in the <code>CIOCPBuffer</code> class. </li>
+</ul>
+
+<p>All the solutions to the problems we have discussed above exist in the <code>CIOCPBuffer</code> class.</p>
+
+<h2>3.8 How to use the source code?</h2>
+
+<p>By inheriting your own class from <code>IOCP</code> (shown in figure 3) and using the virtual functions and the functionality provided by the <code>IOCPS</code> class (e.g., threadpool), it is possible to implement any type of server or client that can efficiently manage a huge number of connections by using only a few number of threads.</p>
+
+<h3>3.8.1 Starting and closing the server/client</h3>
+
+<p>To start the server, call the function:</p>
+
+<pre lang="C++">BOOL Start(<span class="code-keyword">int</span> nPort=<span class="code-digit">999</span>,<span class="code-keyword">int</span> iMaxNumConnections=<span class="code-digit">1201</span>,
+   <span class="code-keyword">int</span> iMaxIOWorkers=<span class="code-digit">1</span>,<span class="code-keyword">int</span> nOfWorkers=<span class="code-digit">1</span>,
+   <span class="code-keyword">int</span> iMaxNumberOfFreeBuffer=<span class="code-digit">0</span>,
+   <span class="code-keyword">int</span> iMaxNumberOfFreeContext=<span class="code-digit">0</span>,
+   BOOL bOrderedSend=TRUE, 
+   BOOL bOrderedRead=TRUE,
+   <span class="code-keyword">int</span> iNumberOfPendlingReads=<span class="code-digit">4</span>);</pre>
+
+<ul>
+<li><code>nPortt</code> 
+<p>Is the port number that the server will listen on. (Let it be -1 for client mode.)</p>
+</li>
+
+<li><code>iMaxNumConnections</code> 
+<p>Maximum number of connections allowed. (Use a big prime number.)</p>
+</li>
+
+<li><code>iMaxIOWorkers</code> 
+<p>Number of Input/Output worker threads.</p>
+</li>
+
+<li><code>nOfWorkers</code> 
+<p>Number of logical workers. (Can be changed at runtime.)</p>
+</li>
+
+<li><code>iMaxNumberOfFreeBuffer</code> 
+<p>Maximum number of buffers that we save for reuse. (-1 for none, 0= Infinite number)</p>
+</li>
+
+<li><code>iMaxNumberOfFreeContext</code> 
+<p>Maximum number of client information objects that are saved for reuse. (-1 for none, 0= Infinite number)</p>
+</li>
+
+<li><code>bOrderedRead</code> 
+<p>Make sequential reads. (We have discussed this before in section 3.6.2.)</p>
+</li>
+
+<li><code>bOrderedSend</code> 
+<p>Make sequential writes. (We have discussed this before in section 3.6.2.)</p>
+</li>
+
+<li><code>iNumberOfPendlingReads</code> 
+<p>Number of pending asynchronous read loops that are waiting for data.</p>
+</li>
+</ul>
+
+<p>To connect to a remote connection (Client mode <code>nPort</code>= -1), call the function:</p>
+
+<pre>Connect(<span class="code-keyword">const</span> CString &amp;strIPAddr, <span class="code-keyword">int</span> nPort)</pre>
+
+<ul>
+<li><code>strIPAddr</code> 
+<p>The IP address of the remote server.</p>
+</li>
+
+<li><code>nPort</code> 
+<p>The port.</p>
+</li>
+</ul>
+
+<p>To close, make the server call the function: <code>ShutDown()</code>.</p>
+
+<p>For example:</p>
+
+<pre lang="C++">MyIOCP m_iocp;
+<span class="code-keyword">if</span>(!m_iocp.Start(-<span class="code-digit">1</span>,<span class="code-digit">1210</span>,<span class="code-digit">2</span>,<span class="code-digit">1</span>,<span class="code-digit">0</span>,<span class="code-digit">0</span>))
+AfxMessageBox(<span class="code-string">"</span><span class="code-string">Error could not start the Client"</span>);
+….
+m_iocp.ShutDown();</pre>
+
+<h2>4.1 Source code description</h2>
+
+<p>For more details about the source code, please check the comments in the source code.</p>
+
+<h3>4.1.1 Virtual functions</h3>
+
+<ul class="method">
+<li><code>NotifyNewConnection</code> 
+<p>Called when a new connection has been established.</p>
+</li>
+
+<li><code>NotifyNewClientContext</code> 
+<p>Called when an empty <code>ClientContext</code> structure is allocated.</p>
+</li>
+
+<li><code>NotifyDisconnectedClient</code> 
+<p>Called when a client disconnects.</p>
+</li>
+
+<li><code>ProcessJob</code> 
+<p>Called when logical workers want to process a job.</p>
+</li>
+
+<li><code>NotifyReceivedPackage</code> 
+<p>Notifies that a new package has arrived.</p>
+</li>
+
+<li><code>NotifyFileCompleted</code> 
+<p>Notifies that a file transfer has finished.</p>
+</li>
+</ul>
+
+<h3>4.1.2 Important variables</h3>
+
+<p>Notice that all the variables have to be exclusively locked by the function that uses the shared variables, this is important to avoid access violations and overlapping writes. All the variables with name XXX, that are needed to be locked, have a XXXLock variable.</p>
+
+<ul>
+<li><code>m_ContextMapLock</code>; 
+<p>Holds all the client data (socket, client data, etc.).</p>
+</li>
+
+<li><code>ContextMap</code> <code>m_ContextMap</code>; </li>
+
+<li><code>m_NumberOfActiveConnections</code> 
+<p>Holds the number of connected connections.</p>
+</li>
+</ul>
+
+<h3>4.1.3 Important functions</h3>
+
+<ul class="method">
+<li><code>GetNumberOfConnections()</code> 
+<p>Returns the number of connections.</p>
+</li>
+
+<li><code>CString GetHostAdress(ClientContext* p)</code> 
+<p>Returns the host address, given a client context.</p>
+</li>
+
+<li><code>BOOL ASendToAll(CIOCPBuffer *pBuff);</code> 
+<p>Sends the content of the buffer to all the connected clients.</p>
+</li>
+
+<li><code>DisconnectClient(CString sID)</code> 
+<p>Disconnects a client, given the unique identification number.</p>
+</li>
+
+<li><code>CString GetHostIP()</code> 
+<p>Returns the local IP number.</p>
+</li>
+
+<li><code>JobItem* GetJob()</code> 
+<p>Removes a <code>JobItem</code> from the queue, returns <code>NULL</code> if there are no Jobs.</p>
+</li>
+
+<li><code>BOOL AddJob(JobItem *pJob)</code> 
+<p>Adds a Job to the queue.</p>
+</li>
+
+<li><code>BOOL SetWorkers(int nThreads)</code> 
+<p>Sets the number of logical workers that can be called anytime.</p>
+</li>
+
+<li><code>DisconnectAll();</code> 
+<p>Disconnect all the clients.</p>
+</li>
+
+<li><code>ARead(…)</code> 
+<p>Makes an asynchronous read.</p>
+</li>
+
+<li><code>ASend(…)</code> 
+<p>Makes an asynchronous send. Sends data to a client.</p>
+</li>
+
+<li><code>ClientContext* FindClient(CString strClient)</code> 
+<p>Finds a client given a string ID. OBS! Not thread safe!</p>
+</li>
+
+<li><code>DisconnectClient(ClientContext* pContext, BOOL bGraceful=FALSE);</code> 
+<p>Disconnects a client.</p>
+</li>
+
+<li><code>DisconnectAll()</code> 
+<p>Disconnects all the connected clients.</p>
+</li>
+
+<li><code>StartSendFile(ClientContext *pContext)</code> 
+<p>Sends a file specified in the <code>ClientContext</code> structure, using the optimized <code>transmitfile(..)</code> function.</p>
+</li>
+
+<li><code>PrepareReceiveFile(..)</code> 
+<p>Prepares the connection for receiving a file. When you call this function, all incoming byte streams are written to a file.</p>
+</li>
+
+<li><code>PrepareSendFile(..)</code> 
+<p>Opens a file and sends a package containing information about the file to the remote connection. The function also disables the <code>ASend(..)</code> function until the file is transmitted or aborted.</p>
+</li>
+
+<li><code>DisableSendFile(..)</code> 
+<p>Disables send file mode.</p>
+</li>
+
+<li><code>DisableRecevideFile(..)</code> 
+<p>Disables receive file mode.</p>
+</li>
+</ul>
+
+<h2>5.1 File transfer</h2>
+
+<p>File transfer is done by using the Winsock 2.0 <code>TransmitFile</code> function. The <code>TransmitFile</code> function transmits file data over a connected socket handle. This function uses the operating system's cache manager to retrieve file data, and provides high-performance file data transfer over sockets. These are some important aspects of asynchronous file transferring:</p>
+
+<ul>
+<li>Unless the <code>TransmitFile</code> function is returned, no other sends or writes to the socket should be performed because this will corrupt the file. Therefore, all the calls to <code>ASend</code> will be disabled after the <code>PrepareSendFile(..)</code> function. </li>
+
+<li>Since the operating system reads the file data sequentially, you can improve caching performance by opening the file handle with <code>FILE_FLAG_SEQUENTIAL_SCAN</code>. </li>
+
+<li>We are using the kernel asynchronous procedure calls while sending the file (<code>TF_USE_KERNEL_APC</code>). Use of <code>TF_USE_KERNEL_APC</code> can deliver significant performance benefits. It is possible (though unlikely), however, that the thread in which the context <code>TransmitFile</code> is initiated is being used for heavy computations; this situation may prevent APCs from launching. </li>
+</ul>
+
+<p>The file transfer is made in this order: the sever initializes the file transfer by calling the <code>PrepareSendFile(..)</code> function. When the client receives the information about the file, it prepares for it by calling the <code>PrepareReceiveFile(..)</code>, and sends a package to the sever to start the file transfer. When the package arrives at the server side, the server calls the <code>StartSendFile(..)</code> function that uses the high performance <code>TransmitFile</code> function to transmit the specified file.</p>
+
+<h2>6 The source code example</h2>
+
+<p>The provided source code example is an echo client/server that also supports file transmission (figure 4). In the source code, a class <code>MyIOCP</code> inherited from <code>IOCP</code> handles the communication between the client and the server, by using the virtual functions mentioned in section 4.1.1.</p>
+
+<p>The most important part of the client or server code is the virtual function <code>NotifyReceivedPackage</code>, as described below:</p>
+
+<pre lang="C++"><span class="code-keyword">void</span> MyIOCP::NotifyReceivedPackage(CIOCPBuffer *pOverlapBuff,
+                           <span class="code-keyword">int</span> nSize,ClientContext *pContext)
+   {
+       BYTE PackageType=pOverlapBuff-&gt;GetPackageType();
+       <span class="code-keyword">switch</span> (PackageType)
+       {
+         <span class="code-keyword">case</span> Job_SendText2Client :
+             Packagetext(pOverlapBuff,nSize,pContext);
+             <span class="code-keyword">break</span>;
+         <span class="code-keyword">case</span> Job_SendFileInfo :
+             PackageFileTransfer(pOverlapBuff,nSize,pContext);
+             <span class="code-keyword">break</span>; 
+         <span class="code-keyword">case</span> Job_StartFileTransfer: 
+             PackageStartFileTransfer(pOverlapBuff,nSize,pContext);
+             <span class="code-keyword">break</span>;
+         <span class="code-keyword">case</span> Job_AbortFileTransfer:
+             DisableSendFile(pContext);
+             <span class="code-keyword">break</span>;};
+   }</pre>
+
+<p>The function handles an incoming message and performs the request sent by the remote connection. In this case, it is only a matter of a simple echo or file transfer. The source code is divided into two projects, IOCP and IOCPClient, which are the server and the client side of the connection.</p>
+
+<h2>6.1 Compiler issues</h2>
+
+<p>When compiling with VC++ 6.0 or .NET, you may get some strange errors dealing with the <code>CFile</code> class, as:</p>
+
+<pre lang="text">“if (pContext-&gt;m_File.m_hFile != 
+INVALID_HANDLE_VALUE) &lt;-error C2446: '!=' : no conversion "
+"from 'void *' to 'unsigned int'”</pre>
+
+<p>This problems can be solved if you update the header files (<em>*.h</em>) or your VC++ 6.0 version, or just change the type conversion error. After some modifications, the server/client source code can be used without MFC.</p>
+
+<h2>7 Special considerations &amp; rule of thumbs</h2>
+
+<p>When you are using this code in other types of applications, there are some programming traps related to this source code and "multithreaded programming" that can be avoided. Nondeterministic errors are errors that occur stochastically “Randomly”, and it is hard to reproduce these nondeterministic errors by performing the same sequence of tasks that created the error. These types of errors are the worst types of errors that exist, and usually, they occur because of errors in the core design implementation of the source code. When the server is running multiple IO working threads, serving clients that are connected, nondeterministic errors as access violations can occur if the programmer has not thought about the source code multithread environment.</p>
+
+<h4>Rule of thumb #1:</h4>
+
+<p>Never read/write to the client context (e.g., <code>ClientContext</code>) with out locking it using the context lock as in the example below. The notification function (e.g., <code>Notify*(ClientContext *pContext)</code>) is already “thread safe”, and you can access the members of <code>ClientContext</code> without locking and unlocking the context.</p>
+
+<table class="ArticleTableNoBorder" height="105" width="600" border="0">
+<tbody>
+<tr>
+<td width="300" height="101">
+<pre lang="C++"><span class="code-comment">//</span><span class="code-comment">Do not do it in this way
+</span>
+<span class="code-comment">//</span><span class="code-comment"> … 
+</span>
+If(pContext-&gt;m_bSomeData)
+pContext-&gt;m_iSomeData=<span class="code-digit">0</span>;
+<span class="code-comment">//</span><span class="code-comment"> …</span></pre>
+</td>
+
+<td width="300">
+<pre lang="C++"><span class="code-comment">//</span><span class="code-comment"> Do it in this way. 
+</span>
+<span class="code-comment">//</span><span class="code-comment">….
+</span>
+pContext-&gt;m_ContextLock.Lock(); 
+If(pContext-&gt;m_bSomeData) 
+pContext-&gt;m_iSomeData=<span class="code-digit">0</span>; 
+pContext-&gt;m_ContextLock.Unlock(); 
+<span class="code-comment">//</span><span class="code-comment">…</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+<p>Also, be aware that when you are locking a Context, other threads or GUI would be waiting for it.</p>
+
+<h4>Rule of thumb #2:</h4>
+
+<p>Avoid or "use with special care" code that has complicated "context locks" or other types of locks inside a “context lock”, because this may lead to a “deadlock” (e.g., A waiting for B that is waiting for C that is waiting for A =&gt; deadlock).</p>
+
+<pre lang="C++">pContext-&gt; m_ContextLock.Lock();
+<span class="code-comment">//</span><span class="code-comment">… code code .. 
+</span>
+pContext2-&gt; m_ContextLock.Lock(); 
+<span class="code-comment">//</span><span class="code-comment"> code code.. 
+</span>
+pContext2-&gt; m_ContextLock.Unlock(); 
+<span class="code-comment">//</span><span class="code-comment"> code code.. 
+</span>
+pContext-&gt; m_ContextLock.Unlock();</pre>
+
+<p>The code above may cause a deadlock.</p>
+
+<h4>Rule of thumb #3:</h4>
+
+<p>Never access a client context outside the notification functions (e.g., <code>Notify*(ClientContext *pContext)</code>). If you do, you have to enclose it with <code>m_ContextMapLock.Lock();</code> … <code>m_ContextMapLock.Unlock();</code>. See the source code below.</p>
+
+<pre lang="C++">ClientContext* pContext=NULL ; 
+m_ContextMapLock.Lock(); 
+pContext = FindClient(ClientID); 
+<span class="code-comment">//</span><span class="code-comment"> safe to access pContext, if it is not NULL
+</span>
+<span class="code-comment">//</span><span class="code-comment"> and are Locked (Rule of thumbs#1:) 
+</span>
+<span class="code-comment">//</span><span class="code-comment">code .. code.. 
+</span>
+m_ContextMapLock.Unlock(); 
+<span class="code-comment">//</span><span class="code-comment"> Here pContext can suddenly disappear because of disconnect. 
+</span>
+<span class="code-comment">//</span><span class="code-comment"> do not access pContext members here.</span></pre>
+
+<h2>8 Future work</h2>
+
+<p>In future, the source code will be updated to have the following features in chronological order:</p>
+
+<ol>
+<li>The implementation of <code>AcceptEx(..)</code> function to accept new connections will be added to the source code, to handle short lived connection bursts and DOS attacks. </li>
+
+<li>The source code will be portable to other platforms as Win32, STL, and WTL. </li>
+</ol>
+
+<h2>9 F.A.Q</h2>
+
+<p><strong>Q1</strong>: The amount of Memory used (server program is rising steadily on increase in client connections, as seen using the 'Windows Task Manager'. Even if clients disconnect, the amount of memory used does not decrease. What's the problem?</p>
+
+<p><strong>A1</strong>: The code tries to reuse the allocated buffers instead of releasing and reallocating it. You can change this by altering the parameters, <code>iMaxNumberOfFreeBuffer</code> and <code>iMaxNumberOfFreeContext</code>. Please review section 3.8.1.</p>
+
+<p><strong>Q2</strong>: I get compilation errors under .NET: <em>"error C2446: '!=' : no conversion from 'unsigned int' to 'HANDLE'"</em> etc.. What is the problem?</p>
+
+<p><strong>A2</strong>: This is because of the different header versions of the SDK. Just change the conversion to <code>HANDLE</code> so the compiler gets happy. You can also just remove the line <code>#define TRANSFERFILEFUNCTIONALITY</code> and try to compile.</p>
+
+<p><strong>Q3</strong>: Can the source code be used without MFC? Pure Win32 and in a service?</p>
+
+<p><strong>A3</strong>: The code was developed to be used with a GUI for a short time (not days or years). I developed this client/server solution for use with GUIs in an MFC environment. Of course, you can use it for normal server solutions. Many people have. Just remove the MFC specific stuff as <code>CString</code>, <code>CPtrList</code> etc.., and replace them with Win32 classes. I don’t like MFC either, so send me a copy when you change the code. Thanks.</p>
+
+<p><strong>Q4</strong>: Excellent work! Thank you for this. When will you implement <code>AcceptEx(..)</code> instead of the connection listener thread?</p>
+
+<p><strong>A4</strong>: As soon as the code is stable. It is quite stable right now, but I know that the combination of several I/O workers and several pending reads may cause some problems. I enjoy that you like my code. Please vote!</p>
+
+<p><strong>Q5</strong>: Why start several I/O workers? Is this necessary if you don’t have a true multiprocessor computer?</p>
+
+<p><strong>A5</strong>: No, it is not necessary to have several I/O workers. Just one thread can handle all the connections. On common home computers, one I/O worker gives the best performance. You do not need to worry about possible access violation threats either. But as computers are getting more powerful each day (e.g., hyperthreading, dual-core, etc.), why not have the possibility to have several threads? :=)</p>
+
+<p><strong>Q6</strong>: Why use several pending reads? What is it good for?</p>
+
+<p><strong>A6</strong>: That depends on the server development strategy that is adapted by the developer, namely “many concurrent connections” vs. “ high throughput server”. Having multiple pending reads increases the throughput of the server because the TCP/IP packages will be written directly into the passed buffer instead of to the TCP/IP stack (no double-buffering). If the server knows that clients send data in bursts, pending reads increase the performance (high throughput). However, every pending receive operation (with <code>WSARecv()</code>) that occurs forces the kernel to lock the receive buffers into the non-paged pool. This may lead to a WSAENOBUFFS error when the physical memory is full (many concurrent connections). The use of pending reads/writes have to be done carefully, and aspects such as “page size on the architecture” and “the amount of non-paged pool (1/4 of the physical memory)” have to be taken into consideration. Furthermore, if you have more than one IO worker, the order of packages is broken (because of the IOCP structure), and the extra work to maintain the order makes it unnecessary to have multiple pending reads. In this design, multiple pending reads is turned off when the number of I/O workers is greater than one because the implementation can not handle the reordering. (The sequence number must exist in the payload instead.)</p>
+
+<p><strong>Q7</strong>: In the previous article, you stated that we have to implement memory management using the <code>VirtualAlloc</code> function instead of <code>new</code>, why have you not implemented it?</p>
+
+<p><strong>A7</strong>: When you allocate memory with <code>new</code>, the memory is allocated in the virtual memory or the physical memory. Where the memory is allocated is unknown, the memory can be allocated between two pages. This means that we load too much memory into the physical memory when we access a certain data (if we use <code>new</code>). Furthermore, you do not know if the allocated memory is in physical memory or in virtual, and also you can not tell the system when "writing back" to hard disk is unnecessary (if we don’t care of the data in memory anymore). But be aware!! Any new allocation using <code>VirtualAlloc*</code> will always be rounded up to 64 KB (page file size) boundary so that if you allocate a new VAS region bound to the physical memory, the OS will consume an amount of physical memory rounded up to the page size, and will consume the VAS of the process rounded up to 64 KB boundary. Using <code>VirtualAlloc</code> can be difficult: <code>new</code> and <code>malloc</code> use <code>virualAlloc</code> internally, but every time you allocate memory with <code>new</code>/<code>delete</code>, a lot of other computation is done, and you do not have the control to put your data (data related to each other) nicely inside the same page (without overlapping two pages). However, heaps are best for managing large numbers of small objects, and I shall change the source code so it only uses <code>new</code>/<code>delete</code> because of code cleanness. I have found that the performance gain is too small relative when compared to the complexity of the source code.</p>
+
+<h2>10 References</h2>
+
+<ul>
+<li>“Developing a Truly Scalable Winsock Server using IO Completion Ports”, norm.NET, <a href="http://www.codeproject.com/KB/IP/iocp.aspx">Writing scalable server applications using IOCP</a>, 22/03/2005. </li>
+
+<li>“<a href="http://msdn.microsoft.com/msdnmag/issues/1000/winsock/">Windows Sockets 2.0: Write Scalable Winsock Apps Using Completion Ports</a>”, Anthony Jones &amp; Amol Deshpande, 22/02/2005. </li>
+
+<li>“A reusable, high performance, socket server class - Part 1-6”, Len Holgate, <a href="http://www.codeproject.com/KB/IP/jbsocketserver1.aspx">A reusable, high performance, socket server class - Part 1</a>, JetByte Limited, <a href="http://www.jetbyte.com/">jetbyte</a>. </li>
+</ul>
+
+<h2>11 Revision History</h2>
+
+<ul>
+<li>Version 1.0 - 2005-05-10 
+<ul>
+<li>Initial public release. </li>
+</ul>
+</li>
+
+<li>Version 1.1 - 2005-06-13 
+<ul>
+<li>Fixed some memory leakage (e.g., <code>~CIOCPBuffer()</code>). </li>
+
+<li><code>TransmitFile</code> is now optional in the source code (by using <code>#define TRANSFERFILEFUNCTIONALITY</code>). </li>
+
+<li>Some extra functions are added (by using <code>#define SIMPLESECURITY</code>). </li>
+</ul>
+</li>
+
+<li>Version 1.11 - 2005-06-18 
+<ul>
+<li>Changes in <code>IOCPS::ProcessPackage(…)</code> to avoid access violation. </li>
+
+<li>Error in <code>CIOCPBuffer::Flush(..)</code> fixed. </li>
+
+<li>Changes in <code>IOCPS::Connect(..)</code> to release socket when an error occurs. </li>
+</ul>
+</li>
+
+<li>Version 1.12 - 2005-11-29 
+<ul>
+<li>Changes in <code>IOCPS::OnWrite(….)</code> to avoiding entering an infinite loop. </li>
+
+<li>Changes in <code>OnRead(…)</code> and <code>OnZeroByteRead (…)</code> to avoid access violation if memory is full and <code>AllocateBuffer</code> fails. </li>
+
+<li>Changes in <code>OnReadCompleted(…)</code> to avoid access violation. </li>
+
+<li>Changes in <code>AcceptIncomingClient(..)</code> to better handle a new connection when the maximum number of connections is reached. </li>
+</ul>
+</li>
+
+<li>Version 1.13 - 2005-12-29 
+<ul>
+<li><code>ReleaseBuffer(…)</code> added to <code>ARead(..)</code>, <code>ASend(..)</code>, <code>AZeroByteRead(..)</code> to avoid memory leakage. </li>
+
+<li>Changes in <code>DisconnectClient(…)</code> and <code>ReleaseClientContext(…)</code> to avoid “duplicate key” error when clients rapidly connect and disconnect. </li>
+
+<li>Changes in <code>IOWorkerThreadProc(…)</code>, <code>OnWrite(ClientContext *pContext,…)</code>, etc. to avoid buffer leakage. </li>
+
+<li>Changes in <code>DisconnectClient( unsigned int iID)</code> to avoid access violation. </li>
+
+<li>Added <code>EnterIOLoop(..)/ExitIPLoop(..)</code> to <code>StartSendFile(..)</code> and <code>OnTransmitFileCompleted(..)</code> to avoid access violation. </li>
+
+<li>Some unessential error messages removed from the release mode, and additional debug information (e.g., <code>TRACE(..)</code> ) added to the source code in debug mode. </li>
+
+<li>The function <code>AcceptIncomingClients(..)</code> changed and replaced with <code>AssociateIncomingClientWithContext(..)</code>. </li>
+
+<li>The <code>Connect(..)</code> function now uses <code>AssociateIncomingClientWithContext(..)</code>. </li>
+
+<li>Transfer file functions are now completely optional by making <code>#define TRANSFERFILEFUNCTIONALITY</code>. </li>
+
+<li>Changes in <code>DisableSendFile(..)</code>and other file transfer functions, to avoid access violation. </li>
+
+<li>Some unnecessary functions and comments removed from the source code. Appropriate functions are now made private, protected, or public. </li>
+
+<li>Several functions are now “inlined” to avoid the overhead of calling a function and for gaining performance. </li>
+
+<li>Removed and replaced <code>EnterIOLoop(..)</code> and other code in <code>OnWrite(ClientContext *pContext,…)</code> to avoid access violations. Information is in the source code. </li>
+
+<li>Added "random disconnect" to demo server, and "auto reconnect" to demo client, plus additional cleanup in the demo project, and I now follow my own advices. :=) </li>
+</ul>
+</li>
+
+<li>Version 1.14 - 2006-02-18 
+<ul>
+<li>Changes in <code>IOWorkerThreadProc(LPVOID pParam)</code>to avoid memory leakage (e.g., <code>new ClientContext</code>) on shutdown ("bug" detected by Maxim Y. Mluhov). </li>
+
+<li>Small changes in <code>OnReadCompleted(..)</code>. </li>
+
+<li>Small change in <code>IOCPS::DisconnectIfIPExist(..)</code>, to gain performance (fix by spring). </li>
+
+<li>Small change in <code>CIOCPBuffer::Flush(...)</code> (fix by spring). </li>
+
+<li>When using multiple pending reads (e.g., <code>m_iNumberOfPendlingReads&gt;1</code>) with multiple I/O workers (e.g., <code>m_iMaxIOWorkers&gt;1</code>), the order of the packages is broken. Temporary fix added to <code>IOCPS::startup()</code> (e.g.,<code>if(m_iMaxIOWorkers&gt;1) m_iNumberOfPendlingReads=1;
+</code>). </li>
+
+<li>Updated section 8 and 6.3.2 in the article. </li>
+</ul>
+</li>
+
+<li>Version 1.15 - 2006-06-19 
+<ul>
+<li>Changes in the <code>CIOCPBuffer</code> class and <code>AllocateBuffer(..)</code>. Now, all the memory allocation/de –allocation is made on the heap using <code>new</code>/<code>delete</code> and <code>VirtualAlloc(..)</code> is not used (read question 7 for more information). </li>
+
+<li>Changes in <code>IOCPS::OnInitialize(..)</code> to avoid <code>WSAENOBUFS</code>, exchanged the order of the <code>ARead(..)</code>, <code>AZeroByteRead(..)</code>. </li>
+
+<li>Multiple pending read removed when multiple I/O workers are used. (Temporary fix is now permanent fix, read A6 and Q6.) </li>
+
+<li>The <code>#define SIMPLESECURITY</code> functions are used inside the <code>ConnectAcceptCondition(..)</code> with the <code>SO_CONDITIONAL_ACCEPT</code> parameter using <code>WSAAccept(..)</code>, increasing security. We can refuse connections in a lower level in the kernel (not sending ACK =&gt; the attacker thinks that the server is down). </li>
+
+<li><code>IsAlreadyConnected(..)</code> and <code>IsInBannedList(..)</code> replacing <code>DisconnectIfIPExist(..)</code> and <code>DisconnectIfBanned(..)</code> because of optimization, the IP compare is using <code>sockaddr_in</code> instead of string compare. </li>
+</ul>
+</li>
+
+<li>Version 1.16 - 2008-12-08 
+<ul>
+
+
+<li>FIX: Changes in <code>IOCPS::GetNextReadBuffer(ClientContext *pContext, CIOCPBuffer *pBuff)</code> to avoid memory leak with CMap. </li>
+
+<li>FIX: <code>AllocateBuffer()</code> can return NULL pointer in the following code in method <code>IOCPS::ARead()</code> </li>
+
+<li>FIX: Socket leakage in <code>IOCPS::AssociateIncomingClientWithContext(SOCKET clientSocket)</code> on shutdown. </li>
+</ul>
+</li>
+<ul>
+
+<ul>
+
+<h2>12 Other IOCP implementations using this source code</h2>
+
+<ul>
+<li><a href="http://www.codeproject.com/KB/IP/YourOwnSecureProtocol.aspx">Build your own cryptographically safe server/client protocol</a>, 2006-06-19, Amin Gholiha. </li>
+</ul>
+
+
+						</ul></ul></ul></div>
+						
+
+						<div class="float-right" style="margin:20px 0 0 10px;border:1px solid #ccc">
+						
+						</div>
+                        
+                        
+						
+						<h2>License</h2>
+						<div id="LicenseTerms"><p>This article, along with any associated source code and files, is licensed under <a href="http://www.codeproject.com/info/cpol10.aspx" rel="license">The Code Project Open License (CPOL)</a></p></div>
+						
+
+                        
+						<h2>Share</h2>
+				        <div class="share-list">
+					        
+				        </div> 
+    			        
+
+
+						
+						<h2 id="ctl00_AboutHeading">About the Author</h2>
+						    
+
+
+<div class="author-wrapper">
+
+    <div class="pic-wrapper"> 
+        <img id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberPhoto" class="profile-pic" src="./A simple IOCP Server_Client Class - CodeProject_files/{111E8876-D021-4447-8462-8BB53BC0DDF0}.jpg" style="border-width:0px;transform:rotate(1deg);">
+
+    </div>
+
+    <div class="container-member">  
+        <b><a id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberProfileLink" class="author" href="http://www.codeproject.com/Members/spinoza">spinoza</a></b>
+
+        <table class="extended">
+        <tbody><tr>
+            <td rowspan="2" nowrap="" valign="middle">
+            
+            </td>
+            <td width="100%">
+                <div class="company">
+                    <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberJobTitle">Program Manager</span>
+	                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberCompany"></span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberLocation">Sweden <img src="./A simple IOCP Server_Client Class - CodeProject_files/SE.gif" alt="Sweden" width="16px" height="11px"></span>
+            </td>
+        </tr>
+        </tbody></table>
+    </div>
+
+    <div class="description">
+        Amin Gholiha.<br>
+Education:<br>
+- Master of Science in Information Technology.<br>
+- Degree of Master of Education.<br>
+Knowledge/interest: programming (.NET,Visual, C#/C++), neural network, mathematical modeling, signal processing, sequence analysis, pattern recognition,robot technology, system design, security and business management systems. For business proposal email Gholiha@rocketmail.com, all other emails will be ignored.<br>
+Current Work: <br>
+Project Manager<br>
+www.easysoft.nu (the best free e-signature tool)
+
+        
+    </div>
+
+</div><br>
+						
+						
+
+						<div class="clearfix"></div>
+
+						<div style="padding-top:8px">
+							
+						</div>
+
+					
+
+				    
+					</form>
+
+				</div>
+
+				
+				<div class="bottom-promo"> 
+				    
+				</div>
+				
+
+                
+        <h2 id="ctl00_AlsoRead_RelatedResults_ctl00_Header" class="also-read">You may also be interested in...</h2>
+        <table class="spaced content-list also-read">
+    
+	    <tbody><tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Thumbnail" href="http://www.codeproject.com/Tips/95363/Another-TCP-echo-server-using-IOCP"><img src="./A simple IOCP Server_Client Class - CodeProject_files/tip100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Link" href="http://www.codeproject.com/Tips/95363/Another-TCP-echo-server-using-IOCP">Another TCP echo server using IOCP</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Thumbnail" href="http://www.codeproject.com/ResearchLibrary/11/Office-SharePoint-Online-Architectural-considerati"><img src="./A simple IOCP Server_Client Class - CodeProject_files/AvePoint_365.gif" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Link" href="http://www.codeproject.com/ResearchLibrary/11/Office-SharePoint-Online-Architectural-considerati">Office 365 SharePoint Online Architectural considerations</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Thumbnail" href="http://www.codeproject.com/Articles/743/Writing-scalable-server-applications-using-IOCP"><img src="./A simple IOCP Server_Client Class - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Link" href="http://www.codeproject.com/Articles/743/Writing-scalable-server-applications-using-IOCP">Writing scalable server applications using IOCP</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Thumbnail" href="http://www.codeproject.com/Articles/1085643/Looking-Ahead-to-Csharp-with-Mads-Torgersen"><img src="./A simple IOCP Server_Client Class - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Link" href="http://www.codeproject.com/Articles/1085643/Looking-Ahead-to-Csharp-with-Mads-Torgersen">Looking Ahead to C# 7 with Mads Torgersen</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Thumbnail" href="http://www.codeproject.com/Articles/11419/IOCPNet-Ultimate-IOCP"><img src="./A simple IOCP Server_Client Class - CodeProject_files/Thumb-11419.gif" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Link" href="http://www.codeproject.com/Articles/11419/IOCPNet-Ultimate-IOCP">IOCPNet - Ultimate IOCP</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Thumbnail" href="http://www.codeproject.com/Articles/1086350/Case-Study-Build-a-Smart-Conference-System-by-Enab"><img src="./A simple IOCP Server_Client Class - CodeProject_files/Thumb-1086350.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Link" href="http://www.codeproject.com/Articles/1086350/Case-Study-Build-a-Smart-Conference-System-by-Enab">Case Study：Build a Smart Conference System by Enabling ZigBee on the Intel® Edison Platform</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+		</tbody></table>
+	
+
+
+
+				
+				
+
+					<h2>Comments and Discussions</h2>
+					
+					<p><img alt="Comment" src="./A simple IOCP Server_Client Class - CodeProject_files/NewComment.gif" width="12px" height="16px">
+					<b>600 messages</b> have been posted for this article 
+					Visit <b><a id="ctl00_ArticleLink" href="http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class">http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class</a></b> to post and view comments on 
+					this article, or click <b><a id="ctl00_PrintWithMessage" href="http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class?display=PrintAll">here</a></b> 
+					to get a print view with messages.</p>
+					
+				
+
+			</div>
+			
+		</td>
+		<td width="170px" class="article-wing-right">
+			
+		</td>
+		</tr></tbody></table>
+
+		
+		<div class="theme1-background" style="height:2px" id="stickyStop"></div>
+
+		<div class="extended tiny-text">
+			<div class="row">
+				<div class="float-left">
+					<a id="ctl00_PermaLink" itemprop="url" href="http://www.codeproject.com/Articles/10330/A-simple-IOCP-Server-Client-Class">Permalink</a> | 
+					<a id="ctl00_AdvertiseLink" href="http://developermedia.com/">Advertise </a> |
+					<a id="ctl00_PrivacyLink" href="http://www.codeproject.com/info/privacy.aspx">Privacy</a> |
+                    <a id="ctl00_TermsOfUseLink" href="http://www.codeproject.com/info/TermsOfUse.aspx">Terms of Use</a> |
+					<a id="ctl00_Mobile">Mobile</a>
+					<br>
+								
+					
+					Web02 |
+					2.8.160311.1 |
+					Last Updated 11 Dec 2008								
+				</div>
+
+                <div id="ctl00_GoogleTranslate" class="translate float-left"><div class="skiptranslate goog-te-gadget" dir="ltr"><div id=":0.targetLanguage" class="goog-te-gadget-simple" style="white-space: nowrap;"><img src="./A simple IOCP Server_Client Class - CodeProject_files/cleardot.gif" class="goog-te-gadget-icon" style="background-image: url(&quot;https://translate.googleapis.com/translate_static/img/te_ctrl3.gif&quot;); background-position: -65px 0px;"><span style="vertical-align: middle;"><a class="goog-te-menu-value" href="javascript:void(0)"><span>选择语言</span><img src="./A simple IOCP Server_Client Class - CodeProject_files/cleardot.gif" width="1" height="1"><span style="border-left-width: 1px; border-left-style: solid; border-left-color: rgb(187, 187, 187);">​</span><img src="./A simple IOCP Server_Client Class - CodeProject_files/cleardot.gif" width="1" height="1"><span style="color: rgb(155, 155, 155);">▼</span></a></span></div></div></div>      
+
+				<div class="float-right align-right">
+					Article Copyright 2005 by spinoza<br>Everything else
+					Copyright © <a href="mailto:webmaster@codeproject.com">CodeProject</a>, 1999-2016 <br>
+				</div>
+
+				
+
+			</div>
+		</div>
+		
+
+		<br clear="all">
+		
+			
+
+	</div> 
+	</div>
+</div>
+
+
+
+
+
+
+<script type="text/javascript" language="Javascript" src="./A simple IOCP Server_Client Class - CodeProject_files/jquery.min.js"></script><script type="text/javascript">//<![CDATA[
+if (typeof jQuery == 'undefined') {
+    document.write(unescape("%3Cscript src='/script/JS/jquery-1.6.2.min.js' type='text/javascript' %3E%3C/script%3E"));
+}//]]></script>
+<script type="text/javascript" language="Javascript" src="./A simple IOCP Server_Client Class - CodeProject_files/element.js"></script>
+<script type="text/javascript" language="Javascript">//<![CDATA[
+$(document).ready(function () { processCodeBlocks.Initialise('#contentdiv'); });
+function googleTranslateElementInit() {  new google.translate.TranslateElement({   pageLanguage: 'en',   layout: google.translate.TranslateElement.InlineLayout.SIMPLE,   autoDisplay: false,   gaTrack: true,   gaId: 'UA-1735123-1'},  'ctl00_GoogleTranslate');}
+$(document).ready(function() { anchorAnimate();
+});
+
+//]]>
+</script><div id="goog-gt-tt" class="skiptranslate" dir="ltr"><div style="padding: 8px;"><div><div class="logo"><img src="./A simple IOCP Server_Client Class - CodeProject_files/translate_24dp.png" width="20" height="20"></div></div></div><div class="top" style="padding: 8px; float: left; width: 100%;"><h1 class="title gray">原文</h1></div><div class="middle" style="padding: 8px;"><div class="original-text"></div></div><div class="bottom" style="padding: 8px;"><div class="activity-links"><span class="activity-link">提供更好的翻译建议</span><span class="activity-link"></span></div><div class="started-activity-container"><hr style="color: #CCC; background-color: #CCC; height: 1px; border: none;"><div class="activity-root"></div></div></div><div class="status-message" style="display: none;"></div></div>
+
+
+
+<iframe frameborder="0" class="goog-te-menu-frame skiptranslate" style="visibility: visible; box-sizing: content-box; width: 914px; height: 263px; display: none;"></iframe></body></html>

@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<!-- saved from url=(0105)http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op?display=Print -->
+<html style="height: 100%;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Handling multiple pending socket read and write operations - CodeProject</title> 
+	<link type="text/css" rel="stylesheet" href="./Handling multiple pending socket read and write operations - CodeProject_files/Main.min.css">
+
+	
+
+<meta name="Description" content="This article explains the potential problems with having multiple pending recvs calls on a single socket.; Author: Len Holgate; Updated: 18 Aug 2002; Section: Internet / Network; Chapter: General Programming; Updated: 18 Aug 2002">
+<meta name="Keywords" content="VC6, VC7, Win2K, WinXP, C++, Windows, Visual-Studio, MFC, Dev, Intermediate,Internet / Network,General Programming,Free source code, tutorials">
+<meta name="Author" content="Len Holgate">
+<meta name="Rating" content="General">
+<meta name="Revisit-After" content="1 days">
+<meta name="application-name" content="CodeProject">
+<meta name="google-translate-customization" content="d908bb7ce7aff658-4c2f3a504525c916-g629383f736781a8a-13">
+
+<link rel="dns-prefetch" href="http://ajax.googleapis.com/"> 
+
+
+
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - All Topics" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=1">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Android" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=22">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - iOS" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=25">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C++" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=2">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - C#" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=3">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Latest articles - Web" href="http://www.codeproject.com/WebServices/ArticleRSS.aspx?cat=23">
+<link rel="alternate" type="application/rss+xml" title="CodeProject Lounge Postings" href="http://www.codeproject.com/webservices/LoungeRSS.aspx">
+<meta name="robots" content="index, follow">
+<link rel="search" type="application/opensearchdescription+xml" title="CodeProject" href="http://www.codeproject.com/info/OpenSearch.xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!--<base target="_top">--><base href="." target="_top">
+	<link rel="icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="shortcut icon" href="http://www.codeproject.com/favicon.ico" type="image/ico">
+<link rel="apple-touch-icon" href="http://www.codeproject.com/images/FavIcon-Apple.png" type="image/png">
+<script type="text/javascript" language="Javascript">//<![CDATA[
+function defrm () { /* thanks twitter */ document.write = ''; window.top.location = window.self.location;  setTimeout(function() { document.body.innerHTML = ''; }, 0);  window.self.onload = function(evt) { document.body.innerHTML = ''; }; }if (window.top !== window.self) {  try {  if (window.top.location.host) { /* will throw */ } else { defrm(); /* chrome */ }  } catch (ex) { defrm(); /* everyone else */ } }if (typeof(DemoUrl)!='undefined')   document.write(unescape('%3Cme')+'ta http'+'-equiv="re'+'fresh"                  con'+'tent="1;url='+DemoUrl+unescape('"%3CE'));
+
+//]]>
+</script>
+
+	
+
+
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-1735123-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_setDomainName', 'www.codeproject.com']);
+	_gaq.push(['_setSessionTimeout', '1200']); 
+
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+	})(); 
+</script><script type="text/javascript" async="" src="./Handling multiple pending socket read and write operations - CodeProject_files/ga.js"></script>
+
+
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="./Handling multiple pending socket read and write operations - CodeProject_files/translateelement.css"><script type="text/javascript" charset="UTF-8" src="./Handling multiple pending socket read and write operations - CodeProject_files/main_zh-CN.js"></script><script type="text/javascript" charset="UTF-8" src="./Handling multiple pending socket read and write operations - CodeProject_files/element_main.js"></script></head>	
+
+<body class="chrome chrome47 touch" style="position: relative; min-height: 100%; top: 0px;">
+
+<a class="access-link" href="http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op?display=Print#Main"><img alt="Click here to Skip to main content" src="./Handling multiple pending socket read and write operations - CodeProject_files/t.gif"></a>
+
+
+
+
+
+<div class="page-background">
+
+	
+	
+
+	
+
+	
+    <div id="ctl00_STM" class="site-top-menu fluid">
+        <div class="main-content">
+            
+        </div>
+    </div>
+
+	
+    <div id="ctl00_SH" class="site-header fluid">
+        <div class="main-content">
+            <div class="logo"><a href="http://www.codeproject.com/"><img id="ctl00_Logo" tabindex="1" title="CodeProject" src="./Handling multiple pending socket read and write operations - CodeProject_files/logo250x135.gif" alt="Home" style="height:135px;width:250px;border-width:0px;"></a></div>
+            <div class="promo"></div>
+        </div>
+    </div>
+
+	<a href="http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op?display=Print#Main"><img alt="Click here to Skip to main content" class="access-link" src="./Handling multiple pending socket read and write operations - CodeProject_files/t.gif"></a>
+
+	
+			
+	
+
+	<div id="A" class="container-content-wrap fluid print"> 
+
+	<div itemscope="" itemtype="http://schema.org/Article" class="container-content"> 
+
+
+		<div class="clearfix">
+			<div class="container-breadcrumb float-left ">
+				<div><a href="http://www.codeproject.com/script/Content/SiteMap.aspx">Articles</a> » <a href="http://www.codeproject.com/Chapters/6/General-Programming.aspx">General Programming</a> » <a href="http://www.codeproject.com/KB/IP/"><span itemprop="articleSection">Internet / Network</span></a> » <a href="http://www.codeproject.com/KB/IP/#Beginners">Beginners</a></div>
+			</div>
+
+			<div class="float-left">
+				
+			</div>
+
+			<div class="edit-links float-right">
+				
+			</div>
+
+			<div class="article-nav float-right">
+					
+		        
+		        
+					
+
+                
+				
+			</div>
+		</div>
+
+		<table class="extended container-article-parts" cellpadding="0" cellspacing="0">
+        <tbody><tr valign="top">
+		<td width="117px" class="article-wing-left">
+
+			
+
+		</td>
+		<td>
+			
+			<div id="AT" class="container-article  fluid tight"> 
+
+				<div class="article">
+
+					<form name="aspnetForm" method="post" action="./Handling multiple pending socket read and write operations - CodeProject_files/Handling multiple pending socket read and write operations - CodeProject.html" id="aspnetForm" style="margin:0;padding:0">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="t8bAMjmXryD/lejyFjRwy8wvNKCv1gdzWKnBTsqYuBuXVve4R2Lbxrf7Xxz6yFVMGDZt1+D9qFBqxzkEkSWkXEntDP4b6jIVCSWcmN0p9U2FaK2T2oWvnIYMEI0Ka8PMBILWilWZRbVP4jMJMZnd99nOV2RdPLgHjXGzedLwZgEmmISLwDlVooN7qvR93ERBp2uzRi1T7LnFyht5Ir/hIhdlPClchJ8IL2mb6lS+G3u7VkBSwKLdFWsBMnxNaQKr48TJAyIOYsE8KGvpB2nhTwK/oh5OkqVWJmDcuW/0awK51baEfMrisPq0Cd9z1rJ5ScW6LgD9yXmhcFHl5eEAF0cw2b1Sb3bueCdW5uDNaooD2tq4/Fh8lyfSrNBHnBHsz7MhIWTlmx+sTH6mjBsKkk9x6NRVOk5LC76yqGhLPLqdr9o6vQdJpQ6/DGuVXlN1var1zEkGYHLM4MrEt5WoHXDCxUVudyR2kuPPgOuuV88my+JsVGJWiA0xD/KnfisTt8NkU7UZKz0Oxd1NJDyMnAYYDSvHMuRVS/EFAFFzAMKUMmteVEho3zrk6w2QamXfnT+HertJ1V31wpqx09yb77ZtDMqNhn8/GaoZHICDbI3A6VS4dMU4pFh+4J52H0Psxn2V8xNNmsOLBi0cAQ6tUiq2CkCx8oZrCOv3sVbgYZMLndzaxPNZzAD0ssVZBD4Vs6ht4oi+ut/q7mDO9Pv2QMJgEy2KYRKTgw1mw7FflZyvs5iT3XZWy2w5hserAIdlcHuap0Y61hmkbzG2SkMmCTqvJHZZtCvt2eq+r00Vp5paL9seV3qd4A9q75onOsugy9ZznR0eqJTHDvb36qOviitYDOcsTGzppA2SPAuxxKBYYEiBMFAtAiOMYJGJfkJo39nBQST6pSFwakrp27dF4YKrSXjjC2kDU1StOb31FvKnc+OtQbl70ZIfyB6nKaFSVi91XvzRGzUhaM4SaFvkD3nfhrIWFwCu8ZGiWFjm2dW7o0XS9VJqgKpiDP9fshBtFWFfrRLPk1hQ1MoAn8oBMihqWoOf+45R9xrIS9hQJm+hYYfkXnxRv4NnOAb8cut6jBP4M34LKKbOO+E7IkUE8+r/jfrE4//H7ixRqG660lfnbj+aj8S0EkSa/9JV6hZ+guJCjK8neIODE1SYZWLwaCPxmHir8F32bymGBFcsN9ts2e0PE9uLgQt+E7PsRbcLk3rCIFeicEVUlUxjplsalfyKIbgeXUdsyUSRNN0zaWig8ceOJzFZEPIoD4lK5PBRXPnXnhD3PBzA+wwmSUSkUYbZiNkVBdWtjeIhg108bSbNP4lBH3fKaa59nYWCL0jVdessQm4TOhVspZn3NnU9WX02EcCVWVlqL04cs/hB1FqUjTpVkRFSxGxhC0RlhW9evv3AGZdPkXRnfmA4u9F5HVUq4wypvJTcYLhk/sn7x8c9zw8uxqHvztF07kgVy1U+fkSspfPAuwqKih+m8vhi3K8DCw8c/nG7BcGQKrGq7TSYHYGyo8Y5o/Iq2dcSp7Sh6HfUeZsRX9MzjRGkAe+PeIzX1/99YDM8jP+G4ajiCvE7bXVCSgojz1ZgZNwsFz9D63Mv3Jq0ZwXE0NfVnorAD9lj4z9sltKwWKEGJaPh/4+M0LfvlOkw485eyQTNVPGgo92V2Dhsy6gNwWLw5zAubxyFYyISgOGwMGwAnI1Y7o4xKA2x7l1MJnWXpUniBVRBCRcNqcyBQ5Xh0hDX0J9ucCtZzGfrkIoN4VIBky/EKh6ylaW7kKVihreVIzkxPM983oj1FUwO9Gv4T4QxwuHWOE2CzUBabcxAbcSm0BoYranJepMcGrmxv5ko6nxiaO+VwJVtawSWeNKmXK0jzvKF08fHGkN5R3OgXibGWG04T9etWpIGBjJdz2IQ4muOxGPBJTg8ao3Sdl39W9idNTbpJmqCE7hxYxcyFoMenuvmqbUIipSJAP0AwHPjLg5CRoIfCz9zWTnayjkdL57b4kTeuQlmvngBefIYZUNuuJ3+zcY41nGbts+b7VJwGG4ySAjN/Q1tlRTNdDpaPglEz6FGrWfn9Plr5XDmmRVRpoVbs0xWTvi23vnmg5/VjpTzGJZVd2SVjVZCh0RYX/quwsLqtvg6LhUY6t6GjTCI+lT5tXh4/Jb29mmtsGjBM6rEEnZu5jbynfdIYpS1XHlachSgQ6eaj0H0/eieYzL438aaG13zgU1Zxp8zisPxDj7WZtvD+f4jkwcPRgVL6KHBkxXUfm3Q9U1w2HstBWj4iPZdVxpSEJqqyVb/D+NdxfpWQm/LPrWx52z528kIWc67UBGrkfgQkUQ3+7sROlqdeiYGeA8YCob2o3zvNeJ6WI0GqfOOA9iaPcsuOeT889UPACJcBRZ0iejP+DdKys8hpGoQrg/G9lnck6dE31V0Mi84Me49llTL0fBHbL5OOhoknxuhvHcz05oJyRHGBlATaptWpyjnYTjWG7VS9WGcqxdxvsbD6B2A0WF12jJn5GvDOV+eWGpfC/PVi5iRva+33+9OB1ryDBTtAIi/xUwxI5Wq1AulUOiF46t1Nli0RWUQdZFMtjreODdSUd5ytkpOM3e0B6Q+mg8ZP5WxoN7/W1iepjLdz4wJttbAiVl3QRoMjDdntw90jQYyRHnow6vsGPpguOVeVX+25wl9t7R1RyzIPxLet9FpWirmD8TJw2x+/ZAf0N/ibKTXs/+vv23JWx1dKIO4eMP48ucbsaGnYhW8s5DxXzLNanWtjCxM+Zgj2m7VWvnQlXqaF2UNfXReguPDwWmPfET5Wze2mtcFtNYAlbiBlZjS6mDq1Jogbilb4dxV6Y7rKHGquCl77tGtfMxpNFjakuQQfmHFg/AtB/Bu5/Y25nXVdF0+YbAMzW1OYp9l+P+JRhpdtyAs3Le11jD/i6VyncI2/d06XxikxriLnJgaAOVuQyYhb/bystCeJIvIMWTn1ekL0EQXk2K+s0Tm0Cs0RiEskaIdLxKumJ1AdhG5XtfaA7g1/rfwAvJR0uZewSMMD1xOfm67leWC0oI2fRDD14eJDN5JLd92Yy0GZJi+VQ0rmIRV1hlDjnV/twoOneLrLCfBvrstArG9EE+YapBQxYsQFFyf9qCfin3HIRx9iMjatWek4CETTD1eD07K+pS99+X22aYJNLaN3ZXXA287p6CGP3PpiJTfdwIMBsiSEV6tqxrPHgtAS3WFSVJRujnMeFsXmA22DwAy7rR2jOFedBFmttrpVKwU1Md0pe2yGTa0q0bNIO7uYvJF3ryIkrohMZB2Ozw4lX+Xf8UI4ikInvSwEFpVuOk2diz3QH3oXD//aVVwzgofjZlE2K8RBlGGBZzgGlYSTkTYEWgTn5zLWvPaAJxN86sGlCGD0dhUsGMaGWxbFfuoQbH0HlFrVRzjFTE7xDQ+YzIHBJIrtaA+TIJALQgyUpngZVX27j/5zQTdGojoal/OhiihoPEYon5P0odVcye3JMthMXxD5yS2EnyP0lAU/MNnpvOxfOtcJ90Akg==">
+</div>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="10C1FD69">
+</div>
+
+					
+					 
+					<div class="header">
+					    <a name="Main"></a>
+
+					    
+					    <a name="_articleTop" id="_articleTop"></a>
+					    <div class="title">
+					        
+					        <h1 id="ctl00_ArticleTitle" itemprop="name">Handling multiple pending socket read and write operations</h1> 
+					    </div>
+
+                        <div style="height:34px">
+					        
+					        <div class="entry float-left">
+                                
+                                <div class="float-left">
+
+						            <span class="author"><a href="http://www.codeproject.com/script/Membership/View.aspx?mid=133" rel="author"><span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><span itemprop="name">Len Holgate</span></span></a></span>, 
+						            <span class="date" itemprop="dateModified" title="Date last updated" content="2002-08-18 00:00:00">
+							            18 Aug 2002</span>
+			
+                                    <a id="ctl00_LicenseLink" title="The Code Project Open License (CPOL)" class="license" href="http://www.codeproject.com/info/cpol10.aspx">CPOL</a><div id="ctl00_CurRat" class="tooltip anchorLink" style="cursor:pointer;margin-top: 5px">
+				
+							            
+
+<table cellpadding="0" cellspacing="0" class="small-text" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating"> 
+<tbody><tr>
+	
+	<td class="nowrap">
+
+		
+			<meta itemprop="bestRating" content="5"> 
+			<meta itemprop="worstRating" content="1">
+		
+
+		<span id="ctl00_ArticleRating_VI">
+		<div class="nowrap rating-stars-medium" style="height:18px;width:80px;position:relative;">
+	<div class="clipped align-left float-left" style="height:16px;width:78px;">
+		<img src="./Handling multiple pending socket read and write operations - CodeProject_files/stars-fill-md.png" style="border-width:0px;">
+	</div><div class="clipped" style="height:16px;width:2px;position:relative;">
+		<img src="./Handling multiple pending socket read and write operations - CodeProject_files/stars-empty-md.png" style="border-width:0px;position:absolute;top:0;right:0;">
+	</div>
+</div>
+		</span>
+
+		
+	</td>
+	
+	<td id="ctl00_ArticleRating_VR" class="nowrap">
+		&nbsp;
+		<span id="ctl00_ArticleRating_VotesR">&nbsp;<span itemprop="ratingValue" class="rating">4.90</span> (<span itemprop="ratingCount" class="count">34</span> votes)</span>
+		
+	</td>
+
+</tr>
+
+</tbody></table>
+
+
+							            <div id="ctl00_RB" class="speech-bubble-container-up">
+								            <div class="speech-bubble-up" style="width:150px !important">
+									                        
+<div>
+<table class="feature" width="100%" height="20px" title="Voting Distribution. Recent data only" cellpadding="0" cellspacing="0"><tbody><tr class="chart-row"><td class="chart-column"><div><img src="./Handling multiple pending socket read and write operations - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="2 votes, 7.1%" title="2 votes, 7.1%"></div><span title="2 votes">1</span></td>
+<td class="chart-column"><span title="0 votes">2</span></td>
+<td class="chart-column"><span title="0 votes">3</span></td>
+<td class="chart-column"><div><img src="./Handling multiple pending socket read and write operations - CodeProject_files/pollcol.gif" width="20pxpx" height="1px" border="0px" alt="1 vote, 3.6%" title="1 vote, 3.6%"></div><span title="1 vote">4</span></td>
+<td class="chart-column"><div><img src="./Handling multiple pending socket read and write operations - CodeProject_files/pollcol.gif" width="20pxpx" height="20px" border="0px" alt="25 votes, 89.3%" title="25 votes, 89.3%"></div><span title="25 votes">5</span></td>
+</tr></tbody></table><div class="small-text align-center">4.90/5 - 34 votes</div><div class="small-text align-center subdue">2 removed</div><div class="small-text align-center subdue">μ 4.56, σ<sub>a</sub> 1.88 [<a href="http://www.codeproject.com/KB/FAQs/RatingReputationFAQ.aspx#noisefilter">?</a>]</div>
+</div>
+								            </div>
+								            <div class="speech-bubble-pointer-up">
+									            <div class="speech-bubble-pointer-up-inner"></div>
+								            </div>
+							            </div>
+						            </div>
+                                </div>
+					        </div>
+
+                            
+						    
+						    	
+                        </div>
+
+   					    
+                        <div id="ctl00_description" class="summary" itemprop="headline">This article explains the potential problems with having multiple pending recvs calls on a single socket.</div><span id="ctl00_thumbnailUrl" class="date" itemprop="image" content="https://codeproject.global.ssl.fastly.net/script/Articles/Images/article100x80.png"></span>			
+
+                    </div>
+                    
+					
+					
+
+					
+
+					
+					
+					
+
+						
+					
+
+					
+
+						
+						<div id="contentdiv" class="text" itemprop="articleBody">
+						
+
+
+
+<p>The following source was built using Visual Studio 6.0 SP5 and Visual Studio .Net. You need to have
+a version of the <a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">Microsoft Platform 
+SDK</a> installed</p>
+<p>Note that the debug builds of the code waste a lot of CPU cycles due to the the debug trace output. 
+It's only worth profiling the release builds.</p>
+<ul class="download">
+<li><a href="http://www.codeproject.com/KB/IP/ReusableSocketServer4/JBSocketServer6.zip">JBSocketServer6.zip - a large packet echo server with
+  multiple pending reads and writes - 111 Kb </a></li>
+<li><a href="http://www.codeproject.com/KB/IP/ReusableSocketServer4/JBServerShutdown.zip">JBSocketShutdown.zip - an off switch for the servers - 42 Kb </a></li>
+</ul>
+
+<h2>Overview</h2>
+<p>"How do you handle the problem of multiple pending <code>WSARecv()</code> calls?" is a common question on 
+the Winsock news groups. It seems that everyone knows that it's often a good idea to have more than
+one outstanding read waiting on a socket and everyone's equally aware that sometimes code doesn't work 
+right when you do that. This article explains the potential problems with multiple pending recvs and
+provides a solution within the reusable server framework that we've been developing over the last few 
+articles.</p>
+<h2>That's out of order</h2>
+<p>There is a subtle issue when using IO completion ports with multiple threads. Although operations
+using the IO completion port will always complete in the order that they were submitted, thread scheduling
+issues may mean that the actual work associated with the completion is processed in an undefined order. 
+For example, if we were to submit three <code>WSARecv</code> requests on a socket then they are
+guaranteed to complete in the order that we submitted them, however if we have 2 threads servicing the IO completion 
+port two of the completions could be being processed simultaneously. If the thread processing the 'first'
+<code>WSARecv</code> completion is interrupted the second may be completely processed before the first. 
+This is even more likely to occur on machines with multiple processors where the two threads may really 
+be executing simultaneously, but it's possible on single processor boxes too. As always, this is the kind 
+of subtle problem that probably wont show its face until you release the software to production...</p>
+<p>The example above is easy to avoid, simply don't have multiple <code>WSARecv</code> requests outstanding 
+on a single socket. This is what we have done so far in the example servers developed in the previous articles. 
+However this reduces performance, it's always more performant to have a receive pending when the data 
+actually arrives on the wire than it is to post a receive after the data has already arrived. Having 
+multiple <code>WSARecv</code> calls outstanding ensures that there's always a call pending. What's more, 
+the problem isn't limited to having multiple <code>WSARecvs</code>. In our server framework we marshal all 
+socket IO calls from the user's threads into our IO thread pool using the IO completion port. This means 
+that there is the potential for a user thread to issue multiple consecutive writes to the socket and for 
+them to be executed in an undefined order.</p>
+<p>In our example servers so far, code like this:</p>
+<pre><span class="code-keyword">void</span> CSocketServer::ReadCompleted(
+   Socket *pSocket,
+   CIOBuffer *pBuffer)
+{
+   <span class="code-comment">//</span><span class="code-comment"> do stuff...
+</span>
+   pSocket-&gt;Write(pBuffer);     <span class="code-comment">//</span><span class="code-comment"> echo the command
+</span>   pSocket-&gt;Write(pResponse1);  <span class="code-comment">//</span><span class="code-comment"> send part 1 response
+</span>   pSocket-&gt;Write(pResponse2);  <span class="code-comment">//</span><span class="code-comment"> send part 2 response
+</span>}
+</pre>
+<p>is potentially unsafe because the writes don't occur synchronously on the user's thread, they are posted 
+to the IO completion port and occur in the IO thread pool.</p>
+<p>Preserving the order of IO completion operations is relatively straight forward. As you'll remember, the 
+overlapped structure passed to all calls that use IO completion ports represents 'per call' data. We can, 
+and do, extend the overlapped structure to include our own 'per call' data by using the
+<code>CIOBuffer
+</code> class. 
+If we add a sequence number to the <code>CIOBuffer</code> we can set the sequence number to the 'next' value in
+the user's thread and then make sure we process the buffers in order in the IO thread pool. This concept
+applies to any IO completion port operation and each distinct operation requires its own sequence number. 
+For our server framework that means that our Socket class must now maintain independent sequence numbers
+for read and write requests.</p>
+<p>The sequence number management code inside the Socket's Write method could be something like this:</p>
+<pre>pBuffer-&gt;SetSequenceNumber(m_writeSequenceNumber++);
+</pre>
+<p>To ensure that the sequence numbers actually represent the order that the operations are submitted requires
+that the setting of the sequence number and the submission of the operation are an atomic operation. For 
+our socket writes this isn't a problem as we only guarentee the order of writes that are performed on a single thread, for socket reads we need to ensure that the allocation of the sequence number and call to
+<code>WSARecv()</code> occur without another thread having a chance to perform read at the same time. This 
+involves using a critical section to lock access to the socket during the sequence number allocation and 
+<code>WSARecv()</code> call. Failure to lock in this area can lead to the actual order that the 
+<code>WSARecv()</code> calls are made failing to match the ordering of the sequence numbers allocated.</p>
+<h2>Orderly processing</h2>
+<p>The code to ensure that the IO completions are handled in order is a little more complex. For each distinct
+IO operation we need to keep track of the next sequence number that we can process. When a call to
+<code>GetQueuedCompletionStatus()</code> returns we need to compare the sequence number in the request with 
+the next sequence number that we can process. If these numbers match then we can process the request. If they 
+don't then the request cannot be processed at this time. If an IO operation cannot be processed it should be 
+stored for later processing. The storage of the out of sequence request needs to be keyed on the sequence number. When an IO thread finds that it can't process the current request it should add the current request 
+to the store and see if there's a request in the store that can be processed. When a request is processed 
+the last thing that the IO thread should do is atomically increment the value representing the next sequence 
+number to process and check to see if there's an IO request in the store that can be processed.</p>
+<p>The above strategy handles the situation where multiple IO requests complete concurrently. Only one
+thread can be processing an IO request that meets the criteria of being the next one to process, all 
+other threads will simply add their requests to the store. When the thread that's processing a request finishes processing it can check to see if there are other requests in the store that can now be processed. 
+If a thread needs to store its IO request then it can do so and then check for a request that can be processed
+in an atomic operation.</p>
+<p>It's actually more complex to read about than it is to look at, the code to process an operation 
+in order might look like this:</p>
+<pre>pBuffer = pSocket-&gt;m_outOfSequenceWrites.GetNext(pBuffer);
+
+<span class="code-keyword">while</span>(pBuffer)
+{
+   DWORD dwFlags = <span class="code-digit">0</span>;
+   DWORD dwSendNumBytes = <span class="code-digit">0</span>;
+
+   <span class="code-keyword">if</span> (SOCKET_ERROR == ::WSASend(
+      pSocket-&gt;m_socket,
+      pBuffer-&gt;GetWSABUF(),
+      <span class="code-digit">1</span>,
+      &amp;dwSendNumBytes,
+      dwFlags,
+      pBuffer,
+      NULL))
+   {
+      <span class="code-comment">//</span><span class="code-comment"> handle errors etc.
+</span>   }
+
+   pBuffer = pSocket-&gt;m_outOfSequenceWrites.ProcessAndGetNext();
+}
+</pre>
+<p>The store itself needs to map sequence numbers to <code>CIOBuffers</code>. The obvious choice of data 
+structure is a <code>std::map&lt;&gt;</code> though your performance requirements and profiling may 
+dictate a different choice. <code>GetNext()</code> takes a buffer, compares its sequence number with the 
+next one we can process and either returns the buffer or adds the buffer to the map and then checks the 
+map to see if the first buffer in the map is the one we can process. Remember that the map stores its 
+elements in order of their keys and that we're using the sequence number as the key, so 
+<code>m_list.begin()</code> refers to the element in the map with the lowest sequence number. If 
+this function returns null then we're still waiting for the 'next' buffer to arrive.</p><p>
+</p><pre>CIOBuffer *CIOBuffer::InOrderBufferList::GetNext(
+   CIOBuffer *pBuffer)
+{
+   CCriticalSection::Owner <span class="code-keyword">lock</span>(m_criticalSection);
+
+   <span class="code-keyword">if</span> (m_next == pBuffer-&gt;GetSequenceNumber())
+   {
+      <span class="code-keyword">return</span> pBuffer;
+   }
+
+   BS::value_type <span class="code-sdkkeyword">value</span>(pBuffer-&gt;GetSequenceNumber(), pBuffer));
+
+   std::pair&lt;BS::iterator, bool&gt; result = m_list.insert(<span class="code-sdkkeyword">value</span>);
+
+   <span class="code-keyword">if</span> (result.second == <span class="code-keyword">false</span>)
+   {
+      <span class="code-comment">//</span><span class="code-comment"> handle error, element already in map
+</span>   }
+
+   CIOBuffer *pNext = <span class="code-digit">0</span>;
+
+   BufferSequence::iterator it;
+
+   it = m_list.begin();
+
+   <span class="code-keyword">if</span> (it != m_list.end())
+   {
+      <span class="code-keyword">if</span> (it-&gt;first == m_next)
+      {
+         pNext = it-&gt;second;
+
+         m_list.erase(it);
+      }
+   }
+
+   <span class="code-keyword">return</span> pNext;
+}
+</pre>
+<p>After processing a buffer the thread can check to see if there's another buffer that it can handle. It needs to increase the last processed value and perform the check atomically, hence the locking.</p>
+<pre>CIOBuffer *CIOBuffer::InOrderBufferList::ProcessAndGetNext()
+{
+   CCriticalSection::Owner <span class="code-keyword">lock</span>(m_criticalSection);
+
+   ::InterlockedIncrement(&amp;m_next);
+
+   CIOBuffer *pNext = <span class="code-digit">0</span>;
+
+   BufferSequence::iterator it;
+
+   it = m_list.begin();
+
+   <span class="code-keyword">if</span> (it != m_list.end())
+   {
+      <span class="code-keyword">if</span> (it-&gt;first == m_next)
+      {
+         pNext = it-&gt;second;
+
+         m_list.erase(it);
+      }
+   }
+
+   <span class="code-keyword">return</span> pNext;
+}
+</pre>
+<h2>Handling reads</h2>
+<p>If the <code>CIOBuffer</code> used by every write that occurs contains a sequence number then similar 
+code could be used to ensure that completed read requests are processed in the correct order. However, 
+there's little point in this code being placed in the server framework as different users of the framework 
+may require different functionality. The <code>CSocketServer</code> derived class could use the 
+<code>CIOBuffer::InOrderBufferList</code> class to maintain processing order or it could simply 
+dispatch the read completions to another IO completion port to pass them across to 
+<a href="http://www.codeproject.com/internet/JBSocketServer2.asp">a business logic thread pool</a>. 
+In this case it's the code in the business logic thread pool that actually processes the data and 
+the order should be maintained there. It may even need do both, ensuring packet order in the 
+<code>CSocketServer</code> class itself so that it can successfully break the byte stream into messages 
+and then dispatching the messages to the business logic thread pool and ensuring that these complete 
+messages are also processed in the correct order. 
+</p><h2>Locking granularity</h2>
+<p>Each <code>Socket</code> must now keep track of independent read and write sequence numbers and maintain a map of 
+out of sequence write requests. Manipulation of the map and associated next sequence number counter must 
+be protected. We use a critical section to protect this code. Be aware that allocating a critical section for each 
+<code>Socket</code> connection is potentially resource intensive. Instead we could choose to trade locking granularity for 
+performance. The <code>CSocketServer</code> class already has a critical section that it uses to protect its lists 
+of <code>Sockets</code>, we could pass a reference to this critical section to each <code>Socket</code> rather than have them 
+create their own critical section. The problem with doing this is that we serialise every <code>Socket</code>'s map access. 
+This work performed inside the critical section is small, but a better solution might be to create a critical 
+section for every X sockets where X is a value that is determined by profiling your application.</p>
+<h2>Only paying for what you use</h2>
+<p>Including sequence numbers in all buffers used for sending and receiving and ensuring the writes are
+processed in order adds a little overhead to the work of the IO threads. If you are sure that your server
+doesn't require this functionality, perhaps because you know that due to your protocol design there will
+only ever be a single read or write request pending, you can opt not to include this functionality by 
+passing false as the <code>useSequenceNumbers</code> flag in the <code>CSocketServer's</code> constructor. 
+Enabling read or write sequence numbers independently is left as an exercise for the reader.</p>
+<h2>An example</h2>
+<p>To demonstrate the concept of ensuring the ordering of multiple reads and writes we've come up with a
+rather contrived example. The packet echo server that we developed in the 
+<a href="http://www.codeproject.com/internet/JBSocketServer1.asp">previous article</a> has been changed as 
+follows:</p>
+<ul>
+<li>It now does its work in a business logic thread pool so that we can demonstrate maintaining receive
+order in both the socket server and the business logic thread pool when the socket server's worker 
+thread isn't doing the processing itself.</li>
+<li>It works with larger packets; we use a two byte packet header rather than a one byte header. 
+This two byte header represents the length of the packet using the following format: packetLength = 
+byte1 + (byte2 * 256). The length of the packet includes the two byte header.</li>
+<li>When the client initially connects it posts a configurable number of reads. As each read completes it
+posts a new read so that it maintains the number of outstanding reads.</li>
+<li>It processes the reads in order, and due to the fact that we now have multiple reads outstanding, 
+<code>CSocketServer::ProcessDataStream()</code> has changed so that when more data is required we don't 
+simply reissue a read to read more data into the same buffer.</li>
+<li>It echoes the packet back to the client in pieces by issuing multiple write requests.</li>
+</ul>
+<p>The large packet echo server is available for download <a href="http://www.codeproject.com/KB/IP/ReusableSocketServer4/JBSocketServer6.zip">here</a> in 
+SocketServer6.zip. Testing using telnet is possible, though more complex, you may find it easier to use 
+the test harness that we develop <a href="http://www.codeproject.com/csharp/TestingSocketServers.asp">here</a> to test it. As with the previous examples, the 
+server runs until a named event is set and then shuts down. The very simple Server Shutdown program, 
+available <a href="http://www.codeproject.com/KB/IP/ReusableSocketServer4/JBServerShutdown.zip">here</a>, 
+provides an off switch for the server.</p>
+<p>Although both the server and thread pool classes are configurable as to whether they use sequence 
+numbers to maintain packet order these settings can only be set in one way for the server to actually
+work in the way that the test harness expects. All packet ordering flags must be set to true. The purpose
+of the flags is so that you can turn off the various sequencing required and see the effect on the test. 
+It's not intended that the server can run reliably in any other configuration.</p>
+<pre>CThreadPool pool(
+   <span class="code-digit">5</span>,                    <span class="code-comment">//</span><span class="code-comment"> initial number of threads to create
+</span>   <span class="code-digit">5</span>,                    <span class="code-comment">//</span><span class="code-comment"> minimum number of threads to keep in the pool
+</span>   <span class="code-digit">10</span>,                   <span class="code-comment">//</span><span class="code-comment"> maximum number of threads in the pool
+</span>   <span class="code-digit">5</span>,                    <span class="code-comment">//</span><span class="code-comment"> maximum number of "dormant" threads
+</span>   <span class="code-digit">5000</span>,                 <span class="code-comment">//</span><span class="code-comment"> pool maintenance period (millis)
+</span>   <span class="code-digit">100</span>,                  <span class="code-comment">//</span><span class="code-comment"> dispatch timeout (millis)
+</span>   <span class="code-digit">10000</span>,                <span class="code-comment">//</span><span class="code-comment"> dispatch timeout for when pool is at max threads
+</span>   <span class="code-digit">20</span>,                   <span class="code-comment">//</span><span class="code-comment"> (1) number of reads to post
+</span>   <span class="code-keyword">true</span>,                 <span class="code-comment">//</span><span class="code-comment"> (2) maintain packet order with sequence numbers
+</span>   <span class="code-keyword">true</span>);                <span class="code-comment">//</span><span class="code-comment"> (3) echo packets with multiple writes
+</span>   
+pool.Start();
+
+CSocketServer server(
+   INADDR_ANY,           <span class="code-comment">//</span><span class="code-comment"> address to listen on
+</span>   <span class="code-digit">5001</span>,                 <span class="code-comment">//</span><span class="code-comment"> port to listen on
+</span>   <span class="code-digit">10</span>,                   <span class="code-comment">//</span><span class="code-comment"> max number of sockets to keep in the pool
+</span>   <span class="code-digit">10</span>,                   <span class="code-comment">//</span><span class="code-comment"> max number of buffers to keep in the pool
+</span>   <span class="code-digit">1024</span>,                 <span class="code-comment">//</span><span class="code-comment"> buffer size 
+</span>   pool,
+   <span class="code-digit">65536</span>,                <span class="code-comment">//</span><span class="code-comment"> max message size
+</span>   <span class="code-keyword">true</span>,                 <span class="code-comment">//</span><span class="code-comment"> (4) maintain read packet order with sequence numbers
+</span>   <span class="code-keyword">true</span>,                 <span class="code-comment">//</span><span class="code-comment"> (5) maintain write packet order with sequence numbers 
+</span>   <span class="code-keyword">true</span>);                <span class="code-comment">//</span><span class="code-comment"> (6) issue a new read before we've completely processed 
+</span>                         <span class="code-comment">//</span><span class="code-comment"> this one</span></pre>
+<p>The configuration flags can be adjusted to witness the following effects:</p>
+<ul>
+<li>The configuration shown above ensures that packets into the read completion method are processed
+in sequence - this maintains the validity of the incoming packet data; Packets into the worker thread 
+are maintained in sequence - this maintains the order of echoing the actual packets; and the sequence
+of write calls is maintained - this maintains the validity of the outgoing packet data.</li>
+<li>If the number of reads to post (1) is reduced to 1 then there is no need to maintain the read 
+completion sequencing ((4) can be set to false) as long as read completion method doesn't issue another
+read until it has completed the processing of the current one ((6) should be set to false).</li>
+<li>If the business logic thread pool doesn't attempt to maintain packet ordering ((2) set to false)
+then the test will likely report sequence number mismatches - as the packets are echoed out of sequence,
+and response != message errors as multiple threads in the business logic thread pool attempt to write
+fragments of the message to the socket in an unsynchronised manner and thus interleave
+  sections of 
+different messages.</li>
+<li>If (2) is left set to false but (3) is also set to false then the test will only fail with sequence
+number mismatches as the threads are now echoing their packets in a single write so the data in the 
+individual packets cant be corrupted by being interleaved with sections of other packets.</li>
+<li>Unfortunately it's currently impossible to simply turn off write packet ordering at the socket 
+server (option (5)) as doing so also turns off read packet sequencing and so makes it impossible to get
+valid data to the business logic thread so that it can echo it and we can witness the writes being
+performed out of sequence. If you're interested in seeing this in action then you can hack at the 
+socket server code.</li>
+</ul>
+<h2>Revision history</h2>
+<ul>
+<li>15th July 2002 - Initial revision. </li>
+<li>12th August 2002 - Removed the race condition in socket closure - Thanks to David McConnell for pointing this out.
+Derived class can receive connection reset and connection error notifications. Socket provides a means to determine if
+send/receive are connected. Dispatch to the thread pool now uses shared enums rather than hard coded constant values.
+General code cleaning and lint issues. Adjusted the code and article so that each socket has its own critical section
+and the resource utilisation optimisation is suggested, rather than imposed. Fixed a bug whereby the critical section 
+that is used to protect the per socket data was owned by the worker thread rather than the per socket data.</li>
+</ul>
+<h2>Other articles in the series</h2>
+<ol>
+<li><a href="http://www.codeproject.com/internet/JBSocketServer1.asp">
+A reusable socket server class</a></li>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer2.asp">
+Business logic processing in a socket server</a></li>
+<li> <a href="http://www.codeproject.com/internet/JBSocketServer3.asp">
+Speeding up socket server connections with AcceptEx</a></li>
+<li> <a href="http://www.codeproject.com/internet/ReusableSocketServer4.asp">
+<i>Handling multiple pending socket read and write operations</i></a></li>
+<li> <a href="http://www.codeproject.com/csharp/TestingSocketServers.asp">
+Testing socket servers with C# and .Net</a></li>
+<li> <a href="http://www.codeproject.com/internet/COMSocketServer.asp">
+A high performance TCP/IP socket server COM component for VB</a></li>
+</ol>
+
+
+						</div>
+						
+
+						<div class="float-right" style="margin:20px 0 0 10px;border:1px solid #ccc">
+						
+						</div>
+                        
+                        
+						
+						<h2>License</h2>
+						<div id="LicenseTerms"><p>This article, along with any associated source code and files, is licensed under <a href="http://www.codeproject.com/info/cpol10.aspx" rel="license">The Code Project Open License (CPOL)</a></p></div>
+						
+
+                        
+						<h2>Share</h2>
+				        <div class="share-list">
+					        
+				        </div> 
+    			        
+
+
+						
+						<h2 id="ctl00_AboutHeading">About the Author</h2>
+						    
+
+
+<div class="author-wrapper">
+
+    <div class="pic-wrapper"> 
+        <img id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberPhoto" class="profile-pic" src="./Handling multiple pending socket read and write operations - CodeProject_files/member_unknown.gif" style="border-width:0px;transform:rotate(-3deg);">
+
+    </div>
+
+    <div class="container-member">  
+        <b><a id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberProfileLink" class="author" href="http://www.codeproject.com/Members/Len-Holgate">Len Holgate</a></b>
+
+        <table class="extended">
+        <tbody><tr>
+            <td rowspan="2" nowrap="" valign="middle">
+            
+            </td>
+            <td width="100%">
+                <div class="company">
+                    <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberJobTitle">Software Developer (Senior)</span>
+	                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberCompany">JetByte Limited</span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span id="ctl00_AboutAuthorRptr_ctl00_AboutAuthor_memberLocation">United Kingdom <img src="./Handling multiple pending socket read and write operations - CodeProject_files/GB.gif" alt="United Kingdom" width="16px" height="11px"></span>
+            </td>
+        </tr>
+        </tbody></table>
+    </div>
+
+    <div class="description">
+        Len has been programming for over 30 years, having first started with a <a rel="nofollow" href="http://www.apj.co.uk/zx80/zx80_main_h.htm">Sinclair ZX-80</a>. Now he runs his own consulting company, <a rel="nofollow" href="http://www.jetbyte.com/">JetByte Limited</a> and has a technical blog <a rel="nofollow" href="http://www.lenholgate.com/">here</a>.<br>
+<br>
+JetByte provides contract programming and consultancy services. We can provide experience in COM, Corba, C++, Windows NT and UNIX. Our speciality is the design and implementation of systems but we are happy to work with you throughout the entire project life-cycle. We are happy to quote for fixed price work, or, if required, can work for an hourly rate. <br>
+<br>
+We are based in London, England, but, thanks to the Internet, we can work 'virtually' anywhere...<br>
+<br>
+Please note that many of the articles here may have updated code available on Len's <a rel="nofollow" href="http://www.lenholgate.com/">blog</a> and that the IOCP socket server framework is also available in a licensed, much improved and fully supported version, see <a rel="nofollow" href="http://www.serverframework.com/">here</a> for details.
+
+        
+    </div>
+
+</div><br>
+						
+						
+
+						<div class="clearfix"></div>
+
+						<div style="padding-top:8px">
+							
+						</div>
+
+					
+
+				    
+					</form>
+
+				</div>
+
+				
+				<div class="bottom-promo"> 
+				    
+				</div>
+				
+
+                
+        <h2 id="ctl00_AlsoRead_RelatedResults_ctl00_Header" class="also-read">You may also be interested in...</h2>
+        <table class="spaced content-list also-read">
+    
+	    <tbody><tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Thumbnail" href="http://www.codeproject.com/Articles/83102/C-SocketAsyncEventArgs-High-Performance-Socket-Cod"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/Thumb-83102.jpg" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl01_Link" href="http://www.codeproject.com/Articles/83102/C-SocketAsyncEventArgs-High-Performance-Socket-Cod">C# SocketAsyncEventArgs High Performance Socket Code</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Thumbnail" href="http://www.codeproject.com/Articles/1085650/Hack-Grunt-to-Make-Your-Website-Awesome"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl02_Link" href="http://www.codeproject.com/Articles/1085650/Hack-Grunt-to-Make-Your-Website-Awesome">Hack Grunt to Make Your Website Awesome</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Thumbnail" href="http://www.codeproject.com/Articles/463947/Working-with-Sockets-in-Csharp"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/Thumb-463947.jpg" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl03_Link" href="http://www.codeproject.com/Articles/463947/Working-with-Sockets-in-Csharp">Working with Sockets in C#</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Thumbnail" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/Thumb-1086365.jpg" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl04_Link" href="http://www.codeproject.com/Articles/1086365/The-Past-Present-and-Future-of-IoT">The Past, Present, and Future of IoT</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+	    <tr>
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Thumbnail" href="http://www.codeproject.com/Articles/990474/Scalable-Socket-Server"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/Thumb-990474.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl05_Link" href="http://www.codeproject.com/Articles/990474/Scalable-Socket-Server">Scalable Socket Server</a></div>
+                
+            </div>
+        </td>
+	
+        <td class="content-list-item" width="50%" valign="top">
+            <div class="thumbnail"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Thumbnail" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/article100x80.png" alt="" style="border-width:0px;"></a></div>
+            <div class="text">
+                <div class="title"><a id="ctl00_AlsoRead_RelatedResults_ctl06_Link" href="http://www.codeproject.com/Articles/1082382/The-Microsoft-Cloud-Platform-for-Developers">The Microsoft Cloud Platform for Developers</a></div>
+                
+            </div>
+        </td>
+	    </tr>
+	
+		</tbody></table>
+	
+
+
+
+				
+				
+
+					<h2>Comments and Discussions</h2>
+					
+					<p><img alt="Comment" src="./Handling multiple pending socket read and write operations - CodeProject_files/NewComment.gif" width="12px" height="16px">
+					<b>238 messages</b> have been posted for this article 
+					Visit <b><a id="ctl00_ArticleLink" href="http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op">http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op</a></b> to post and view comments on 
+					this article, or click <b><a id="ctl00_PrintWithMessage" href="http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op?display=PrintAll">here</a></b> 
+					to get a print view with messages.</p>
+					
+				
+
+			</div>
+			
+		</td>
+		<td width="170px" class="article-wing-right">
+			
+		</td>
+		</tr></tbody></table>
+
+		
+		<div class="theme1-background" style="height:2px" id="stickyStop"></div>
+
+		<div class="extended tiny-text">
+			<div class="row">
+				<div class="float-left">
+					<a id="ctl00_PermaLink" itemprop="url" href="http://www.codeproject.com/Articles/2610/Handling-multiple-pending-socket-read-and-write-op">Permalink</a> | 
+					<a id="ctl00_AdvertiseLink" href="http://developermedia.com/">Advertise </a> |
+					<a id="ctl00_PrivacyLink" href="http://www.codeproject.com/info/privacy.aspx">Privacy</a> |
+                    <a id="ctl00_TermsOfUseLink" href="http://www.codeproject.com/info/TermsOfUse.aspx">Terms of Use</a> |
+					<a id="ctl00_Mobile">Mobile</a>
+					<br>
+								
+					
+					Web02 |
+					2.8.160311.1 |
+					Last Updated 18 Aug 2002								
+				</div>
+
+                <div id="ctl00_GoogleTranslate" class="translate float-left"><div class="skiptranslate goog-te-gadget" dir="ltr"><div id=":0.targetLanguage" class="goog-te-gadget-simple" style="white-space: nowrap;"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/cleardot.gif" class="goog-te-gadget-icon" style="background-image: url(&quot;https://translate.googleapis.com/translate_static/img/te_ctrl3.gif&quot;); background-position: -65px 0px;"><span style="vertical-align: middle;"><a class="goog-te-menu-value" href="javascript:void(0)"><span>选择语言</span><img src="./Handling multiple pending socket read and write operations - CodeProject_files/cleardot.gif" width="1" height="1"><span style="border-left-width: 1px; border-left-style: solid; border-left-color: rgb(187, 187, 187);">​</span><img src="./Handling multiple pending socket read and write operations - CodeProject_files/cleardot.gif" width="1" height="1"><span style="color: rgb(155, 155, 155);">▼</span></a></span></div></div></div>      
+
+				<div class="float-right align-right">
+					Article Copyright 2002 by Len Holgate<br>Everything else
+					Copyright © <a href="mailto:webmaster@codeproject.com">CodeProject</a>, 1999-2016 <br>
+				</div>
+
+				
+
+			</div>
+		</div>
+		
+
+		<br clear="all">
+		
+			
+
+	</div> 
+	</div>
+</div>
+
+
+
+
+
+
+<script type="text/javascript" language="Javascript" src="./Handling multiple pending socket read and write operations - CodeProject_files/jquery.min.js"></script><script type="text/javascript">//<![CDATA[
+if (typeof jQuery == 'undefined') {
+    document.write(unescape("%3Cscript src='/script/JS/jquery-1.6.2.min.js' type='text/javascript' %3E%3C/script%3E"));
+}//]]></script>
+<script type="text/javascript" language="Javascript" src="./Handling multiple pending socket read and write operations - CodeProject_files/element.js"></script>
+<script type="text/javascript" language="Javascript">//<![CDATA[
+$(document).ready(function () { processCodeBlocks.Initialise('#contentdiv'); });
+function googleTranslateElementInit() {  new google.translate.TranslateElement({   pageLanguage: 'en',   layout: google.translate.TranslateElement.InlineLayout.SIMPLE,   autoDisplay: false,   gaTrack: true,   gaId: 'UA-1735123-1'},  'ctl00_GoogleTranslate');}
+$(document).ready(function() { anchorAnimate();
+});
+
+//]]>
+</script><div id="goog-gt-tt" class="skiptranslate" dir="ltr"><div style="padding: 8px;"><div><div class="logo"><img src="./Handling multiple pending socket read and write operations - CodeProject_files/translate_24dp.png" width="20" height="20"></div></div></div><div class="top" style="padding: 8px; float: left; width: 100%;"><h1 class="title gray">原文</h1></div><div class="middle" style="padding: 8px;"><div class="original-text"></div></div><div class="bottom" style="padding: 8px;"><div class="activity-links"><span class="activity-link">提供更好的翻译建议</span><span class="activity-link"></span></div><div class="started-activity-container"><hr style="color: #CCC; background-color: #CCC; height: 1px; border: none;"><div class="activity-root"></div></div></div><div class="status-message" style="display: none;"></div></div>
+
+
+
+<iframe frameborder="0" class="goog-te-menu-frame skiptranslate" style="visibility: visible; box-sizing: content-box; width: 937px; height: 263px; display: none;"></iframe></body></html>
